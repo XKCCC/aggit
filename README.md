@@ -18,7 +18,14 @@ npm run db:setup     # 建表 + 写入种子数据（演示账号与示例内容
 npm run dev          # 启动，访问 http://localhost:3000
 ```
 
-> 数据库文件在 `prisma/dev.db`，想重置数据随时再跑一遍 `npm run db:setup`。
+> 数据库连接串配置在 `.env` 的 `DATABASE_URL`（Postgres）。
+
+## 部署到 Vercel
+
+1. Vercel 后台 → **Storage** → 创建 **Postgres** 数据库（Neon 免费档即可），复制连接串
+2. Vercel 项目 **Settings → Environment Variables** 添加 `DATABASE_URL=<连接串>`
+3. 本地 `.env` 也换成同一连接串后执行 `npm run db:setup` 初始化表结构与种子数据
+4. 推送代码，Vercel 自动构建部署（`postinstall` 已配置自动生成 Prisma Client）
 
 ## 演示账号
 
