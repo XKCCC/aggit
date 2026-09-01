@@ -1,0 +1,113 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String    @id @default(cuid())
+  username    String    @unique
+  displayName String
+  role        String // DEVELOPER | EMPLOYER
+  avatarColor String    @default("#10b981")
+  bio         String?
+  githubUrl   String?
+  createdAt   DateTime  @default(now())
+
+  projects Project[]
+  bounties Bounty[]
+  stars    Star[]
+  claims   Claim[]
+  comments Comment[]
+  sessions Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  tagline     String
+  readme      String
+  repoUrl     String?
+  framework   String
+  language    String
+  scenario    String
+  licenseType String   @default("MIT")
+  openType    String   @default("FULL") // FULL 全源码开源 | DOCS_ONLY 仅调用文档
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stars    Star[]
+  bounties Bounty[]
+  comments Comment[]
+}
+
+model Star {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, projectId])
+}
+
+model Bounty {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  budgetMin   Int
+  budgetMax   Int
+  currency    String   @default("CNY")
+  tags        String   @default("") // 逗号分隔，保持精益
+  status      String   @default("OPEN") // OPEN | COMPLETED | CANCELLED
+  creatorId   String
+  creator     User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  claims   Claim[]
+  comments Comment[]
+}
+
+model Claim {
+  id          String   @id @default(cuid())
+  bountyId    String
+  bounty      Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  developerId String
+  developer   User     @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  message     String
+  status      String   @default("ACTIVE") // ACTIVE | SUBMITTED | ACCEPTED | REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([bountyId, developerId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bountyId  String?
+  bounty    Bounty?  @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
