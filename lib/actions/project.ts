@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fetchGithubRepo } from "@/lib/github";
+import { rateLimit } from "@/lib/ratelimit";
 
 export async function importGithubRepo(url: string) {
   return fetchGithubRepo(url);
@@ -13,6 +14,9 @@ export async function importGithubRepo(url: string) {
 export async function createProject(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (!(await rateLimit("createProject", 10, 60_000))) {
+    redirect("/agents/new?error=2");
+  }
 
   const name = String(formData.get("name") || "").trim();
   const tagline = String(formData.get("tagline") || "").trim();

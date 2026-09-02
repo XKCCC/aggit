@@ -4,10 +4,12 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { rateLimit } from "@/lib/ratelimit";
 
 export async function addComment(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (!(await rateLimit("addComment", 20, 60_000))) return;
 
   const body = String(formData.get("body") || "").trim();
   const bountyId = String(formData.get("bountyId") || "") || null;

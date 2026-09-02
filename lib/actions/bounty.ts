@@ -4,10 +4,14 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { rateLimit } from "@/lib/ratelimit";
 
 export async function createBounty(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (!(await rateLimit("createBounty", 10, 60_000))) {
+    redirect("/bounties/new?error=2");
+  }
 
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
