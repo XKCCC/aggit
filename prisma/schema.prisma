@@ -14,6 +14,7 @@ model User {
   role         String // DEVELOPER | EMPLOYER
   passwordHash String?
   email        String?   @unique
+  emailVerified Boolean  @default(false)
   blocked      Boolean   @default(false)
   isAdmin      Boolean   @default(false) // 仅可通过数据库脚本授予，注册通道永不开放
   avatarColor  String    @default("#10b981")
@@ -36,6 +37,15 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   expiresAt DateTime
+}
+
+model EmailCode {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Project {

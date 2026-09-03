@@ -6,6 +6,7 @@ import { createSession, destroySession, getCurrentUser } from "@/lib/auth";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { rateLimit } from "@/lib/ratelimit";
 import { verifyCaptcha } from "@/lib/captcha";
+import { sendCode } from "@/lib/verifycode";
 
 export type AuthFormState = { error?: string; ok?: boolean };
 
@@ -63,6 +64,12 @@ export async function passwordLogin(
   }
   if (user.blocked) return { error: "blocked" };
 
+  // 邮箱未验证：补发验证码并引导去验证页
+  if (user.email && !user.emailVerified) {
+    await sendCode(user.email);
+    redirect(`/verify?email=${encodeURIComponent(user.email)}`);
+  }
+
   await createSession(user.id);
   redirect("/dashboard");
 }
@@ -113,24 +120,40 @@ export async function register(
   const existing = await prisma.user.findFirst({
     where: { OR: [{ username }, { email }] },
   });
-  if (existing) return { error: "taken" };
+  if (existing && existing.emailVerified) return { error: "taken" };
 
   const colorIndex =
     username.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0) %
     AVATAR_COLORS.length;
-  const user = await prisma.user.create({
-    data: {
-      username,
-      displayName,
-      email,
-      role,
-      passwordHash: hashPassword(password),
-      avatarColor: AVATAR_COLORS[colorIndex],
-      // isAdmin / blocked 走 schema 默认值 false，注册通道无法触碰
-    },
-  });
-  await createSession(user.id);
-  redirect("/dashboard");
+
+  if (existing) {
+    // 此前注册过但没完成邮箱验证：允许用新信息覆盖并重新发码
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        username,
+        displayName,
+        email,
+        role,
+        passwordHash: hashPassword(password),
+      },
+    });
+  } else {
+    await prisma.user.create({
+      data: {
+        username,
+        displayName,
+        email,
+        role,
+        passwordHash: hashPassword(password),
+        avatarColor: AVATAR_COLORS[colorIndex],
+        // isAdmin / blocked / emailVerified 走 schema 默认值 false，注册通道无法触碰
+      },
+    });
+  }
+
+  await sendCode(email);
+  redirect(`/verify?email=${encodeURIComponent(email)}`);
 }
 
 export async function changePassword(
