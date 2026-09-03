@@ -7,6 +7,7 @@ import { BOUNTY_STATUS, CLAIM_STATUS, ROLES } from "@/lib/constants";
 import { formatBudget, timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -206,6 +207,22 @@ export default async function DashboardPage() {
           )}
         </section>
       </div>
+
+      {/* 账号安全 */}
+      <section className="mt-6 rounded-xl border border-[#21262d] bg-[#0d1117] p-5">
+        <h2 className="mb-1 font-semibold text-zinc-100">
+          {m.dashboard.security}
+        </h2>
+        <p className="mb-4 text-sm text-zinc-500">
+          {m.dashboard.boundEmail}：{" "}
+          {user.email ? (
+            <span className="text-zinc-300">{user.email}</span>
+          ) : (
+            <span className="text-zinc-600">{m.dashboard.noEmail}</span>
+          )}
+        </p>
+        <ChangePasswordForm labels={m.dashboard} errors={m.login.errors} />
+      </section>
     </div>
   );
 }

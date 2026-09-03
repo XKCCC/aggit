@@ -2,11 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { createSession, destroySession } from "@/lib/auth";
+import { createSession, destroySession, getCurrentUser } from "@/lib/auth";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { rateLimit } from "@/lib/ratelimit";
+import { verifyCaptcha } from "@/lib/captcha";
 
-export type AuthFormState = { error?: string };
+export type AuthFormState = { error?: string; ok?: boolean };
 
 const AVATAR_COLORS = [
   "#10b981",
@@ -19,17 +20,40 @@ const AVATAR_COLORS = [
   "#60a5fa",
 ];
 
+// 平台保留用户名：普通注册永不开放，管理员账号只能通过数据库脚本创建
+const RESERVED_USERNAMES = new Set([
+  "admin",
+  "administrator",
+  "root",
+  "system",
+  "support",
+  "official",
+  "moderator",
+  "mod",
+  "owner",
+  "aggit",
+]);
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function passwordLogin(
   _prev: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
-  const username = String(formData.get("username") || "")
+  const loginId = String(formData.get("loginId") || "")
     .trim()
     .toLowerCase();
   const password = String(formData.get("password") || "");
-  if (!username || !password) return { error: "empty" };
+  if (!loginId || !password) return { error: "empty" };
 
-  const user = await prisma.user.findUnique({ where: { username } });
+  if (!(await rateLimit("login", 10, 60_000))) {
+    return { error: "ratelimit" };
+  }
+
+  // 支持用户名或邮箱登录
+  const user = await prisma.user.findFirst({
+    where: { OR: [{ username: loginId }, { email: loginId }] },
+  });
   if (
     !user ||
     !user.passwordHash ||
@@ -37,6 +61,8 @@ export async function passwordLogin(
   ) {
     return { error: "invalid" };
   }
+  if (user.blocked) return { error: "blocked" };
+
   await createSession(user.id);
   redirect("/dashboard");
 }
@@ -53,19 +79,30 @@ export async function register(
   if (!(await rateLimit("register", 3, 60_000))) {
     return { error: "ratelimit" };
   }
+  // 人机验证
+  const captchaToken = String(formData.get("captchaToken") || "");
+  const captchaAnswer = String(formData.get("captcha") || "");
+  if (!verifyCaptcha(captchaToken, captchaAnswer)) {
+    return { error: "captcha" };
+  }
 
   const username = String(formData.get("username") || "")
     .trim()
     .toLowerCase();
   const displayName = String(formData.get("displayName") || "").trim();
+  const email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
   const role = String(formData.get("role") || "");
   const password = String(formData.get("password") || "");
   const password2 = String(formData.get("password2") || "");
 
   if (
     !/^[a-z0-9_]{3,20}$/.test(username) ||
+    RESERVED_USERNAMES.has(username) ||
     !displayName ||
     displayName.length > 30 ||
+    !EMAIL_RE.test(email) ||
     password.length < 8 ||
     (role !== "DEVELOPER" && role !== "EMPLOYER")
   ) {
@@ -73,7 +110,9 @@ export async function register(
   }
   if (password !== password2) return { error: "mismatch" };
 
-  const existing = await prisma.user.findUnique({ where: { username } });
+  const existing = await prisma.user.findFirst({
+    where: { OR: [{ username }, { email }] },
+  });
   if (existing) return { error: "taken" };
 
   const colorIndex =
@@ -83,21 +122,42 @@ export async function register(
     data: {
       username,
       displayName,
+      email,
       role,
       passwordHash: hashPassword(password),
       avatarColor: AVATAR_COLORS[colorIndex],
+      // isAdmin / blocked 走 schema 默认值 false，注册通道无法触碰
     },
   });
   await createSession(user.id);
   redirect("/dashboard");
 }
 
-export async function mockLogin(formData: FormData) {
-  const username = String(formData.get("username") || "");
-  const user = await prisma.user.findUnique({ where: { username } });
-  if (!user) redirect("/login?error=1");
-  await createSession(user.id);
-  redirect("/dashboard");
+export async function changePassword(
+  _prev: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const oldPassword = String(formData.get("oldPassword") || "");
+  const newPassword = String(formData.get("newPassword") || "");
+  const newPassword2 = String(formData.get("newPassword2") || "");
+
+  if (
+    !user.passwordHash ||
+    !verifyPassword(oldPassword, user.passwordHash)
+  ) {
+    return { error: "invalid" };
+  }
+  if (newPassword.length < 8) return { error: "format" };
+  if (newPassword !== newPassword2) return { error: "mismatch" };
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: hashPassword(newPassword) },
+  });
+  return { ok: true };
 }
 
 export async function logout() {

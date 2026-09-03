@@ -14,6 +14,7 @@ export async function getCurrentUser() {
     include: { user: true },
   });
   if (!session || session.expiresAt < new Date()) return null;
+  if (session.user.blocked) return null; // 被封禁用户视为未登录
   return session.user;
 }
 

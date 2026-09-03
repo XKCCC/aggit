@@ -35,6 +35,14 @@ export default async function Navbar() {
           >
             {m.nav.bounties}
           </Link>
+          {user?.isAdmin && (
+            <Link
+              href="/admin"
+              className="rounded-md px-3 py-1.5 text-red-300 hover:bg-[#161b22]"
+            >
+              {m.nav.admin}
+            </Link>
+          )}
         </nav>
 
         <div className="ml-auto flex items-center gap-2">

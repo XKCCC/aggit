@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { passwordLogin, register } from "@/lib/actions/auth";
+import { getCaptcha } from "@/lib/actions/captcha";
 import type { Messages } from "@/lib/i18n";
 
 type Labels = Messages["login"];
@@ -54,16 +55,22 @@ function ErrorTip({ text }: { text?: string }) {
   );
 }
 
+function errorText(labels: Labels, key?: string) {
+  if (!key) return undefined;
+  return labels.errors[key as keyof typeof labels.errors] ?? key;
+}
+
 function LoginForm({ labels }: { labels: Labels }) {
   const [state, action, pending] = useActionState(passwordLogin, {});
   return (
     <form action={action} className="space-y-4">
-      <ErrorTip text={state.error ? labels.errors[state.error as keyof typeof labels.errors] : undefined} />
+      <ErrorTip text={errorText(labels, state.error)} />
       <div>
-        <label className={labelCls}>{labels.username}</label>
+        <label className={labelCls}>{labels.loginId}</label>
         <input
-          name="username"
+          name="loginId"
           required
+          placeholder={labels.loginIdPlaceholder}
           autoComplete="username"
           className={inputCls}
         />
@@ -91,9 +98,17 @@ function LoginForm({ labels }: { labels: Labels }) {
 
 function RegisterForm({ labels }: { labels: Labels }) {
   const [state, action, pending] = useActionState(register, {});
+  const [cap, setCap] = useState<{ token: string; question: string } | null>(
+    null
+  );
+
+  useEffect(() => {
+    getCaptcha().then(setCap);
+  }, []);
+
   return (
     <form action={action} className="space-y-4">
-      <ErrorTip text={state.error ? labels.errors[state.error as keyof typeof labels.errors] : undefined} />
+      <ErrorTip text={errorText(labels, state.error)} />
 
       {/* 蜜罐字段：对正常用户不可见，机器人填了即被静默丢弃 */}
       <input
@@ -126,6 +141,19 @@ function RegisterForm({ labels }: { labels: Labels }) {
           />
         </div>
       </div>
+
+      <div>
+        <label className={labelCls}>{labels.email}</label>
+        <input
+          name="email"
+          type="email"
+          required
+          placeholder={labels.emailPlaceholder}
+          autoComplete="email"
+          className={inputCls}
+        />
+      </div>
+
       <div>
         <label className={labelCls}>{labels.role}</label>
         <select name="role" className={inputCls} defaultValue="DEVELOPER">
@@ -133,6 +161,7 @@ function RegisterForm({ labels }: { labels: Labels }) {
           <option value="EMPLOYER">{labels.roleEmp}</option>
         </select>
       </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className={labelCls}>{labels.password}</label>
@@ -156,9 +185,35 @@ function RegisterForm({ labels }: { labels: Labels }) {
           />
         </div>
       </div>
+
+      <div>
+        <label className={labelCls}>{labels.captcha}</label>
+        <input type="hidden" name="captchaToken" value={cap?.token ?? ""} />
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 shrink-0 items-center rounded-lg border border-[#30363d] bg-[#0d1117] px-3 font-mono text-sm font-semibold tracking-wider text-emerald-300 select-none">
+            {cap?.question ?? "…"}
+          </span>
+          <input
+            name="captcha"
+            required
+            inputMode="numeric"
+            placeholder={labels.captchaPlaceholder}
+            autoComplete="off"
+            className={inputCls}
+          />
+          <button
+            type="button"
+            onClick={() => getCaptcha().then(setCap)}
+            className="shrink-0 rounded-lg border border-[#30363d] px-3 py-2 text-xs text-zinc-400 hover:text-zinc-200"
+          >
+            {labels.captchaRefresh}
+          </button>
+        </div>
+      </div>
+
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || !cap}
         className="w-full rounded-lg bg-emerald-500 py-2.5 font-medium text-[#0d1117] hover:bg-emerald-400 disabled:opacity-50"
       >
         {labels.registerSubmit}
