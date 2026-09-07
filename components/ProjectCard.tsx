@@ -25,9 +25,12 @@ export default async function ProjectCard({
         <h3 className="font-mono text-base font-semibold text-zinc-100 group-hover:text-emerald-300">
           {project.name}
         </h3>
-        <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
-          {OPEN_TYPES[project.openType] ?? project.openType}
-        </Tag>
+        <div className="flex shrink-0 gap-1.5">
+          {project.kind === "COMPONENT" && <Tag>{m.agents.kindComponent}</Tag>}
+          <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
+            {OPEN_TYPES[project.openType] ?? project.openType}
+          </Tag>
+        </div>
       </div>
 
       <p className="mt-2 line-clamp-2 min-h-10 text-sm text-zinc-400">

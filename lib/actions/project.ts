@@ -25,6 +25,7 @@ export async function createProject(formData: FormData) {
   const language = String(formData.get("language") || "Python");
   const scenario = String(formData.get("scenario") || "其他");
   const openType = String(formData.get("openType") || "FULL");
+  const kind = String(formData.get("kind") || "AGENT");
   const licenseType = String(formData.get("licenseType") || "MIT");
   const repoUrl = String(formData.get("repoUrl") || "").trim();
 
@@ -41,6 +42,7 @@ export async function createProject(formData: FormData) {
       language,
       scenario,
       openType,
+      kind: kind === "COMPONENT" ? "COMPONENT" : "AGENT",
       licenseType,
       repoUrl: repoUrl || null,
       ownerId: user.id,

@@ -51,6 +51,12 @@ export default async function AgentDetailPage({
     : false;
 
   const infoRows: Array<[string, string]> = [
+    [
+      m.agents.kind,
+      project.kind === "COMPONENT"
+        ? m.agents.kindComponent
+        : m.agents.kindAgent,
+    ],
     [m.agentDetail.framework, project.framework],
     [m.agentDetail.language, project.language],
     [m.agentDetail.scenario, project.scenario],
@@ -75,6 +81,9 @@ export default async function AgentDetailPage({
             <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
               {OPEN_TYPES[project.openType] ?? project.openType}
             </Tag>
+            {project.kind === "COMPONENT" && (
+              <Tag>{m.agents.kindComponent}</Tag>
+            )}
             {project.visibility === "HIDDEN" && (
               <Tag tone="violet">{m.moderation.hidden}</Tag>
             )}

@@ -60,6 +60,7 @@ model Project {
   scenario    String
   licenseType String   @default("MIT")
   openType    String   @default("FULL") // FULL 全源码开源 | DOCS_ONLY 仅调用文档
+  kind        String   @default("AGENT") // AGENT 完整 Agent | COMPONENT 组件/Skill/Harness
   visibility  String   @default("PUBLIC") // PUBLIC 公开 | HIDDEN 隐藏（仅作者/管理员可见）
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)

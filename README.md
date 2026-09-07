@@ -8,6 +8,9 @@
     <a href="https://github.com/Gitdude010/LEAF">🌱 创世项目 LEAF</a> ·
     <a href="https://github.com/XKCCC/aggit/issues">🐛 Issues</a>
   </p>
+  <p>
+    <b>中文</b> · <a href="README.en.md">English</a>
+  </p>
 </div>
 
 ---

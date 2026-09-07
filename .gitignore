@@ -36,6 +36,9 @@ yarn-error.log*
 # local sqlite database（可用 npm run db:setup 重建）
 /prisma/dev.db*
 
+# 本地工具配置
+.qwen/
+
 # vercel
 .vercel
 

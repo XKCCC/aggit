@@ -23,6 +23,7 @@ export default async function AgentsPage({
   const q = sp.q?.trim() ?? "";
   const framework = sp.framework ?? "";
   const scenario = sp.scenario ?? "";
+  const kind = sp.kind ?? "";
   const sort = sp.sort ?? "new";
 
   const projects = await prisma.project.findMany({
@@ -44,6 +45,7 @@ export default async function AgentsPage({
           : {},
         framework ? { framework } : {},
         scenario ? { scenario } : {},
+        kind ? { kind } : {},
       ],
     },
     include: { owner: true, _count: { select: { stars: true } } },
@@ -82,6 +84,7 @@ export default async function AgentsPage({
             <input type="hidden" name="framework" value={framework} />
           )}
           {scenario && <input type="hidden" name="scenario" value={scenario} />}
+          {kind && <input type="hidden" name="kind" value={kind} />}
           {sort !== "new" && <input type="hidden" name="sort" value={sort} />}
           <input
             name="q"
@@ -98,13 +101,13 @@ export default async function AgentsPage({
         </form>
         <div className="ml-auto flex gap-2 text-xs">
           <Link
-            href={buildHref({ q, framework, scenario, sort: "new" })}
+            href={buildHref({ q, framework, scenario, kind, sort: "new" })}
             className={chip(sort !== "stars")}
           >
             {m.common.sortNew}
           </Link>
           <Link
-            href={buildHref({ q, framework, scenario, sort: "stars" })}
+            href={buildHref({ q, framework, scenario, kind, sort: "stars" })}
             className={chip(sort === "stars")}
           >
             {m.common.sortStars}
@@ -116,10 +119,39 @@ export default async function AgentsPage({
       <div className="mt-4 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className="w-20 shrink-0 text-xs text-zinc-600">
+            {m.agents.kind}
+          </span>
+          <Link
+            href={buildHref({ q, framework, scenario, sort, kind: "" })}
+            className={chip(!kind)}
+          >
+            {m.common.all}
+          </Link>
+          <Link
+            href={buildHref({ q, framework, scenario, sort, kind: "AGENT" })}
+            className={chip(kind === "AGENT")}
+          >
+            {m.agents.kindAgent}
+          </Link>
+          <Link
+            href={buildHref({
+              q,
+              framework,
+              scenario,
+              sort,
+              kind: "COMPONENT",
+            })}
+            className={chip(kind === "COMPONENT")}
+          >
+            {m.agents.kindComponent}
+          </Link>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="w-20 shrink-0 text-xs text-zinc-600">
             {m.agents.framework}
           </span>
           <Link
-            href={buildHref({ q, scenario, sort, framework: "" })}
+            href={buildHref({ q, scenario, sort, kind, framework: "" })}
             className={chip(!framework)}
           >
             {m.common.all}
@@ -127,7 +159,7 @@ export default async function AgentsPage({
           {FRAMEWORKS.map((f) => (
             <Link
               key={f}
-              href={buildHref({ q, scenario, sort, framework: f })}
+              href={buildHref({ q, scenario, sort, kind, framework: f })}
               className={chip(framework === f)}
             >
               {f}
@@ -139,7 +171,7 @@ export default async function AgentsPage({
             {m.agents.scenario}
           </span>
           <Link
-            href={buildHref({ q, framework, sort, scenario: "" })}
+            href={buildHref({ q, framework, sort, kind, scenario: "" })}
             className={chip(!scenario)}
           >
             {m.common.all}
@@ -147,7 +179,7 @@ export default async function AgentsPage({
           {SCENARIOS.map((s) => (
             <Link
               key={s}
-              href={buildHref({ q, framework, sort, scenario: s })}
+              href={buildHref({ q, framework, sort, kind, scenario: s })}
               className={chip(scenario === s)}
             >
               {s}
