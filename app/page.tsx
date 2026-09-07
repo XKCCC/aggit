@@ -76,7 +76,7 @@ export default async function Home() {
               { value: String(agentCount), label: m.home.statsAgents },
               { value: String(openBountyCount), label: m.home.statsBounties },
               {
-                value: `¥${totalBudget.toLocaleString()}`,
+                value: `$${totalBudget.toLocaleString()}`,
                 label: m.home.statsBudget,
               },
             ].map((s) => (
