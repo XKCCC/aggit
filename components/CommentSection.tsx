@@ -1,12 +1,14 @@
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import Avatar from "./Avatar";
+import PendingSubmit from "./PendingSubmit";
 import { addComment } from "@/lib/actions/comment";
 import { timeAgo } from "@/lib/format";
+import { getI18n } from "@/lib/i18n";
 
 type CommentData = Prisma.CommentGetPayload<{ include: { user: true } }>;
 
-export default function CommentSection({
+export default async function CommentSection({
   comments,
   bountyId,
   projectId,
@@ -25,6 +27,7 @@ export default function CommentSection({
     empty: string;
   };
 }) {
+  const { m } = await getI18n();
   return (
     <section className="mt-10">
       <h2 className="mb-4 text-lg font-semibold text-zinc-100">
@@ -51,12 +54,11 @@ export default function CommentSection({
             className="w-full resize-y rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-emerald-400/50"
           />
           <div className="mt-3 text-right">
-            <button
-              type="submit"
+            <PendingSubmit
+              label={labels.submit}
+              pendingLabel={m.common.submitting}
               className="rounded-md bg-emerald-500 px-4 py-1.5 text-sm font-medium text-[#0d1117] hover:bg-emerald-400"
-            >
-              {labels.submit}
-            </button>
+            />
           </div>
         </form>
       ) : (

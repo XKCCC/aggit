@@ -4,13 +4,16 @@ import { useState, useTransition } from "react";
 import { createProject, importGithubRepo } from "@/lib/actions/project";
 import { FRAMEWORKS, LANGUAGES, SCENARIOS } from "@/lib/constants";
 import type { Messages } from "@/lib/i18n";
+import PendingSubmit from "./PendingSubmit";
 
 const LICENSES = ["MIT", "Apache-2.0", "GPL-3.0", "BSD-3-Clause", "其他"];
 
 export default function AgentForm({
   labels,
+  submittingLabel,
 }: {
   labels: Messages["agentNew"];
+  submittingLabel: string;
 }) {
   const [ghUrl, setGhUrl] = useState("");
   const [importMsg, setImportMsg] = useState<{
@@ -212,12 +215,11 @@ export default function AgentForm({
         </div>
 
         <div className="flex justify-end border-t border-[#21262d] pt-5">
-          <button
-            type="submit"
+          <PendingSubmit
+            label={labels.submit}
+            pendingLabel={submittingLabel}
             className="rounded-lg bg-emerald-500 px-6 py-2.5 font-medium text-[#0d1117] hover:bg-emerald-400"
-          >
-            {labels.submit}
-          </button>
+          />
         </div>
       </form>
     </div>

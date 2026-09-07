@@ -23,7 +23,7 @@ export default async function NewAgentPage({
         </p>
       )}
       <div className="mt-8">
-        <AgentForm labels={m.agentNew} />
+        <AgentForm labels={m.agentNew} submittingLabel={m.common.submitting} />
       </div>
     </div>
   );

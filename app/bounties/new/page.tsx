@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getI18n } from "@/lib/i18n";
 import { createBounty } from "@/lib/actions/bounty";
+import PendingSubmit from "@/components/PendingSubmit";
 
 export default async function NewBountyPage({
   searchParams,
@@ -115,12 +116,11 @@ export default async function NewBountyPage({
         </div>
 
         <div className="flex justify-end border-t border-[#21262d] pt-5">
-          <button
-            type="submit"
+          <PendingSubmit
+            label={m.bountyNew.submit}
+            pendingLabel={m.common.submitting}
             className="rounded-lg bg-violet-500 px-6 py-2.5 font-medium text-[#0d1117] hover:bg-violet-400"
-          >
-            {m.bountyNew.submit}
-          </button>
+          />
         </div>
       </form>
     </div>
