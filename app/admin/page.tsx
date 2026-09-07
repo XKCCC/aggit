@@ -8,7 +8,7 @@ import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
 import PendingSubmit from "@/components/PendingSubmit";
 import DeleteButton from "@/components/DeleteButton";
-import { setUserBlocked } from "@/lib/actions/admin";
+import { setUserBlocked, setEscrowStatus } from "@/lib/actions/admin";
 import {
   setProjectVisibility,
   deleteProject,
@@ -224,6 +224,7 @@ export default async function AdminPage() {
               <th className="px-4 py-3 font-medium">{m.moderation.owner}</th>
               <th className="px-4 py-3 font-medium">{m.bountyDetail.budget}</th>
               <th className="px-4 py-3 font-medium">{m.moderation.visibility}</th>
+              <th className="px-4 py-3 font-medium">{m.escrow.status}</th>
               <th className="px-4 py-3 font-medium"></th>
             </tr>
           </thead>
@@ -258,7 +259,50 @@ export default async function AdminPage() {
                   )}
                 </td>
                 <td className="px-4 py-3">
+                  {b.escrowStatus === "NONE" ? (
+                    <span className="text-xs text-zinc-600">—</span>
+                  ) : (
+                    <Tag
+                      tone={
+                        b.escrowStatus === "RELEASED"
+                          ? "accent"
+                          : b.escrowStatus === "DEPOSITED"
+                            ? "violet"
+                            : "default"
+                      }
+                    >
+                      {b.escrowStatus === "RELEASED"
+                        ? m.escrow.released
+                        : b.escrowStatus === "DEPOSITED"
+                          ? m.escrow.deposited
+                          : m.escrow.awaiting}
+                    </Tag>
+                  )}
+                </td>
+                <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
+                    {b.escrowStatus === "AWAITING" && (
+                      <form
+                        action={setEscrowStatus.bind(null, b.id, "DEPOSITED")}
+                      >
+                        <PendingSubmit
+                          label={m.escrow.markDeposited}
+                          pendingLabel={m.common.submitting}
+                          className="rounded-md border border-emerald-400/40 px-3 py-1 text-xs text-emerald-300 hover:bg-emerald-400/10"
+                        />
+                      </form>
+                    )}
+                    {b.escrowStatus === "DEPOSITED" && (
+                      <form
+                        action={setEscrowStatus.bind(null, b.id, "RELEASED")}
+                      >
+                        <PendingSubmit
+                          label={m.escrow.markReleased}
+                          pendingLabel={m.common.submitting}
+                          className="rounded-md border border-emerald-400/40 px-3 py-1 text-xs text-emerald-300 hover:bg-emerald-400/10"
+                        />
+                      </form>
+                    )}
                     <form
                       action={setBountyVisibility.bind(
                         null,

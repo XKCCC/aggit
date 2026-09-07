@@ -24,3 +24,15 @@ export async function setUserBlocked(userId: string, blocked: boolean) {
   }
   revalidatePath("/admin");
 }
+
+// Concierge 托管：管理员线下确认到账 / 放款后，手动推进托管状态
+export async function setEscrowStatus(bountyId: string, status: string) {
+  await requireAdmin();
+  if (!["AWAITING", "DEPOSITED", "RELEASED"].includes(status)) return;
+  await prisma.bounty.update({
+    where: { id: bountyId },
+    data: { escrowStatus: status },
+  });
+  revalidatePath("/admin");
+  revalidatePath(`/bounties/${bountyId}`);
+}

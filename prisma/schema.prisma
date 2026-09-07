@@ -91,6 +91,7 @@ model Bounty {
   tags        String   @default("") // 逗号分隔，保持精益
   status      String   @default("OPEN") // OPEN | COMPLETED | CANCELLED
   visibility  String   @default("PUBLIC") // PUBLIC 公开 | HIDDEN 隐藏（仅发布方/管理员可见）
+  escrowStatus String  @default("NONE") // NONE 未开始 | AWAITING 等待托管 | DEPOSITED 已托管 | RELEASED 已放款
   creatorId   String
   creator     User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   projectId   String?

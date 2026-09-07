@@ -11,6 +11,8 @@ import Markdown from "@/components/Markdown";
 import CommentSection from "@/components/CommentSection";
 import PendingSubmit from "@/components/PendingSubmit";
 import DeleteButton from "@/components/DeleteButton";
+import PaymentQr from "@/components/PaymentQr";
+import { PAYMENT_INFO } from "@/lib/payment";
 import {
   setBountyVisibility,
   deleteBounty,
@@ -270,6 +272,73 @@ export default async function BountyDetailPage({
               </form>
             </div>
           )}
+
+          {/* 发布方：验收通过后的赏金托管面板 */}
+          {isCreator && bounty.status === "COMPLETED" && (
+            <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-5">
+              <h2 className="text-sm font-semibold text-emerald-300">
+                {m.escrow.title}
+              </h2>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-zinc-400">{m.escrow.status}</span>
+                <span className="text-emerald-300">
+                  {bounty.escrowStatus === "RELEASED"
+                    ? m.escrow.released
+                    : bounty.escrowStatus === "DEPOSITED"
+                      ? m.escrow.deposited
+                      : m.escrow.awaiting}
+                </span>
+              </div>
+              {bounty.escrowStatus === "AWAITING" && (
+                <div className="mt-3">
+                  <p className="text-xs leading-relaxed text-zinc-400">
+                    {m.escrow.creatorTip}
+                  </p>
+                  <div className="mt-3 flex justify-center">
+                    <PaymentQr
+                      src={PAYMENT_INFO.qrImage}
+                      alt={m.escrow.qrAlt}
+                      missingHint={m.escrow.qrMissing}
+                    />
+                  </div>
+                  <ul className="mt-3 space-y-1 text-xs text-zinc-500">
+                    {PAYMENT_INFO.accountLines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 border-t border-emerald-400/10 pt-2 text-xs text-zinc-500">
+                    {m.escrow.amountHint}：
+                    <span className="font-mono text-violet-300">
+                      {formatBudget(
+                        bounty.budgetMin,
+                        bounty.budgetMax,
+                        bounty.currency
+                      )}
+                    </span>
+                    {" · "}
+                    {m.escrow.commission} {PAYMENT_INFO.commissionRate * 100}%
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 中标的开发者：托管状态提示 */}
+          {myClaim?.status === "ACCEPTED" &&
+            bounty.escrowStatus !== "NONE" && (
+              <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-5">
+                <h2 className="text-sm font-semibold text-emerald-300">
+                  {m.escrow.title}
+                </h2>
+                <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+                  {bounty.escrowStatus === "RELEASED"
+                    ? m.escrow.devReleased
+                    : bounty.escrowStatus === "DEPOSITED"
+                      ? m.escrow.devDeposited
+                      : m.escrow.awaiting}
+                </p>
+              </div>
+            )}
 
           {/* 发布方 / 管理员：可见性与删除 */}
           {(isCreator || isAdmin) && (

@@ -110,7 +110,8 @@ export async function acceptClaim(claimId: string) {
     }),
     prisma.bounty.update({
       where: { id: claim.bountyId },
-      data: { status: "COMPLETED" },
+      // 验收通过后进入托管流程：等待发布方把赏金打入平台账户
+      data: { status: "COMPLETED", escrowStatus: "AWAITING" },
     }),
   ]);
   revalidatePath(`/bounties/${claim.bountyId}`);
