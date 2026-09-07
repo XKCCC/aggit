@@ -1,63 +1,105 @@
-# aggit — Agent 开源集市
+<div align="center">
+  <img src="public/aggit.svg" width="96" alt="OpenAggit logo" />
 
-AI Agent 的开源发布与悬赏交易平台（V1 原型）：
+  # OpenAggit (aggit)
 
-- **类 GitHub 的 Agent 仓库展示**：README Markdown 渲染、框架/语言/场景标签、Star、GitHub 仓库一键导入
-- **类 Gitcoin 的悬赏大厅**：需求方发布带预算的悬赏，开发者认领 → 交付 → 验收完成
-- 讨论区、工作台、中英文切换、模拟登录（预留 GitHub OAuth 接入点）
+  **Open + Agent + Git — AI Agent 的开源悬赏交易大厅**
 
-## 技术栈
+  交易 Agent，不该像买卖传统软件那样死板。
 
-Next.js 16（App Router）+ TypeScript + Tailwind CSS 4 + Prisma 6 + SQLite
+  [🌐 主站 openaggit.com](https://openaggit.com) · [🌱 创世项目 LEAF](https://github.com/Gitdude010/LEAF) · [🐛 Issues](https://github.com/XKCCC/aggit/issues)
+</div>
 
-## 快速开始
+---
+
+## 🎯 愿景 (Vision)
+
+OpenAggit 是一个专注于 **AI Agent 定制与交易**的极客悬赏平台。
+
+在这个 AI 爆炸的时代，供需两端严重割裂：企业想要 Agent 降本增效却找不到靠谱的人，硬核开发者写了一堆牛逼的 Agent 却没有变现通道。传统外包平台是个黑盒——需求不透明、交付无验证、信用靠嘴说。
+
+我们的信条：
+
+> 交易 Agent 不该像传统的买卖软件那样死板。
+> 我们需要的是一个自带**代码验证、沙盒测试、信用担保**的非标交易大厅——
+> 卖家秀的是真实可运行的代码，买家买的是确定性的交付结果。
+
+## 🚧 当前阶段 (Current Status: The MVP)
+
+先坦白，不装：
+
+- V1.0 的前端界面和底层基建是 **AI 辅助生成**的，极简，甚至有些粗糙。
+- 但链路是真跑通的：注册登录（GitHub OAuth / 邮箱验证码）、Agent 展示（README 渲染 / GitHub 一键导入）、悬赏大厅（认领 → 交付 → 验收）、双语切换、内容治理，全都在线上跑着。
+- **支付与资金担保目前是"绿野仙踪式 (Wizard of Oz)"运营**：发布悬赏需预付 30% 定金，收款、仲裁、放款全部由创始人**人工介入**（邮件/微信群撮合）。没有一行自动支付代码——这是刻意为之，不是偷懒。
+
+> 自动化的 Stripe 分账、智能合约托管、开发者信用分系统——
+> 这些"正经"的玩意儿，留给社区一起造。急什么，先把单跑起来。
+
+## 💰 可持续发展 (Sustainability)
+
+**这是一个完全开源的项目，我们不卖代码。**
+
+盈利逻辑只有一条：平台上达成真实交易，收取 **10%-15%** 的服务费，用于：
+
+1. **资金托管与担保** —— 防白嫖，防跑路；
+2. **争议仲裁** —— 交付扯皮时的极客技术仲裁成本；
+3. **基建续命** —— Vercel / Neon / Cloudflare 的服务器账单。
+
+随便 Fork 去私有化部署，MIT 协议管够。
+但如果你想享受主站的社区流量撮合和资金担保服务——请在主站按规矩玩。🤝
+
+## 🌱 001 号创世项目 (Genesis Agent: LEAF)
+
+平台的第一个标杆项目，用来告诉社区"我们接的是什么级别的悬赏"：
+
+> **[LEAF](https://github.com/Gitdude010/LEAF)** — 一个具备**代码自进化能力**的 MLE (Machine Learning Engineer) Agent。
+>
+> 它不是那种"生成一段代码就跑"的玩具。LEAF 基于**蒙特卡洛树搜索 (MCTS)** 迭代构建候选机器学习方案：
+>
+> ```
+> 生成代码 → 沙盒执行 → 捕获报错/评估指标 → 自我修正 → 再次执行
+>      ↑____________________ 反馈闭环 ____________________|
+> ```
+>
+> OOM 了自动降 batch_size，KeyError 了自己修字段映射——一个真的会在失败后自我进化的 Agent。
+> 这，就是本平台悬赏的技术水位线。
+
+## 🤝 参与贡献 (How to Contribute)
+
+兄弟，来都来了，提个 PR 再走？
+
+**当前急需的火力支援：**
+
+- 🎨 **UI 美化** —— 现在的界面能看，但离"性感"还有距离
+- 🗄️ **数据库 Schema 优化** —— Prisma 表结构拍脑袋成分较高，求 DBA 大佬指点
+- 💳 **自动化支付接入** —— Stripe / 微信支付的定金托管与分账，把创始人从人工对账里解放出来
+- 🔍 **全文检索** —— 现在只是模糊匹配，数据量大了需要真·搜索引擎
+- 🧪 **Agent 沙盒验证** —— 让买家在平台上直接试跑 Agent，而不只是看 README
+
+改个错别字、调个边距也算 PR，一样会被认真合并。
+
+> 在这里提 PR，不只是贡献代码。
+> 你是在为自己未来在平台上接悬赏，积累**最硬核的信用分**——
+> 毕竟雇主挑人时，"这个平台的核心贡献者"比任何简历都有说服力。
+
+---
+
+## 🛠 技术栈与本地运行
+
+```
+Next.js 16 (App Router) · TypeScript · Tailwind CSS 4
+Prisma 6 · PostgreSQL (Neon Serverless) · Vercel
+```
 
 ```bash
 npm install          # 安装依赖
-npm run db:setup     # 建表 + 写入种子数据（演示账号与示例内容）
-npm run dev          # 启动，访问 http://localhost:3000
+npm run db:setup     # 建表 + 种子数据（需要先在 .env 配置 DATABASE_URL）
+npm run dev          # http://localhost:3000
 ```
 
-> 数据库连接串配置在 `.env` 的 `DATABASE_URL`（Postgres）。
+数据库连接串配置在 `.env` 的 `DATABASE_URL`（Postgres，本地开发可用任何实例）。
+可选环境变量：`GITHUB_ID` / `GITHUB_SECRET`（OAuth 登录）、`RESEND_API_KEY` + `EMAIL_FROM`（注册验证码邮件）。
 
-## 部署到 Vercel
+## 📜 License
 
-1. Vercel 后台 → **Storage** → 创建 **Postgres** 数据库（Neon 免费档即可），复制连接串
-2. Vercel 项目 **Settings → Environment Variables** 添加 `DATABASE_URL=<连接串>`
-3. 本地 `.env` 也换成同一连接串后执行 `npm run db:setup` 初始化表结构与种子数据
-4. 推送代码，Vercel 自动构建部署（`postinstall` 已配置自动生成 Prisma Client）
-
-## 演示账号
-
-访问 `/login` 一键切换身份（V1 模拟登录，无密码）：
-
-| 身份 | 账号 | 角色 |
-| --- | --- | --- |
-| 开发者 | @xkcc | mle-evolver 作者 |
-| 开发者 | @ling_dev | LangChain/RAG 方向 |
-| 开发者 | @alex_zhou | Dify/Flowise 低代码玩家 |
-| 需求方 | @boss_chen | 跨境电商创始人 |
-| 需求方 | @wang_quant | 量化私募技术负责人 |
-
-建议体验路径：用 **@wang_quant** 登录发布悬赏 → 切 **@ling_dev** 认领 → 标记交付 → 切回 @wang_quant 验收通过。
-
-## 切换真实 GitHub OAuth（V2 预留）
-
-接入点见 `lib/auth.ts` 底部注释：注册 GitHub OAuth App 拿到 Client ID/Secret 后，
-新增回调路由换取用户 profile，写入 User 表并调用 `createSession()` 即可，
-其余页面只依赖 `getCurrentUser()`，无需改动。
-
-## 目录结构
-
-```
-app/            页面（首页/探索/悬赏/工作台/登录）
-components/     UI 组件（导航栏/卡片/Markdown/评论/Star）
-lib/            业务层：db、auth、i18n、GitHub 导入、Server Actions
-prisma/         schema.prisma（7 表）+ seed.js
-```
-
-## V1 边界（后续迭代方向）
-
-- 无在线支付与资金托管：悬赏金额仅展示，交付验收后双方线下结算
-- Agent 不提供在线试用：README 教程 + BYOK（自带 Key）体验
-- 平台抽成、开发者信用评级、纠纷仲裁：待交易跑通后迭代
+MIT © OpenAggit contributors. Fork it, ship it, 记得回来提 PR。
