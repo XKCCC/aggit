@@ -4,6 +4,14 @@ import { getI18n } from "@/lib/i18n";
 import BountyRow from "@/components/BountyRow";
 import { BOUNTY_STATUS } from "@/lib/constants";
 
+function buildHref(status: string, q: string) {
+  const usp = new URLSearchParams();
+  if (status) usp.set("status", status);
+  if (q) usp.set("q", q);
+  const s = usp.toString();
+  return s ? `/bounties?${s}` : "/bounties";
+}
+
 export default async function BountiesPage({
   searchParams,
 }: {
@@ -12,12 +20,23 @@ export default async function BountiesPage({
   const sp = await searchParams;
   const { m } = await getI18n();
   const status = sp.status ?? "";
+  const q = sp.q?.trim() ?? "";
 
   const bounties = await prisma.bounty.findMany({
     where: {
       visibility: "PUBLIC",
-      // 待付定金的悬赏不对外展示
-      status: status ? status : { not: "PENDING" },
+      // 待付定金的悬赏不对外展示（状态栏也不提供该筛选项）
+      status: status && status !== "PENDING" ? status : { not: "PENDING" },
+      ...(q
+        ? {
+            // 大小写不敏感的模糊匹配：标题/需求描述/标签
+            OR: [
+              { title: { contains: q, mode: "insensitive" } },
+              { description: { contains: q, mode: "insensitive" } },
+              { tags: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
     },
     include: {
       creator: true,
@@ -29,10 +48,12 @@ export default async function BountiesPage({
 
   const tabs = [
     { key: "", label: m.bounties.statusAll },
-    ...Object.entries(BOUNTY_STATUS).map(([key, v]) => ({
-      key,
-      label: v.label,
-    })),
+    ...Object.entries(BOUNTY_STATUS)
+      .filter(([key]) => key !== "PENDING")
+      .map(([key, v]) => ({
+        key,
+        label: v.label,
+      })),
   ];
 
   return (
@@ -52,20 +73,37 @@ export default async function BountiesPage({
         </Link>
       </div>
 
-      <div className="mt-6 flex gap-2 border-b border-[#21262d] pb-3">
-        {tabs.map((t) => (
-          <Link
-            key={t.key}
-            href={t.key ? `/bounties?status=${t.key}` : "/bounties"}
-            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-              status === t.key
-                ? "border-violet-400/50 bg-violet-400/10 text-violet-300"
-                : "border-[#30363d] text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
-            }`}
+      <div className="mt-6 flex flex-wrap items-center gap-3 border-b border-[#21262d] pb-3">
+        <div className="flex gap-2">
+          {tabs.map((t) => (
+            <Link
+              key={t.key}
+              href={buildHref(t.key, q)}
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                status === t.key
+                  ? "border-violet-400/50 bg-violet-400/10 text-violet-300"
+                  : "border-[#30363d] text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+              }`}
+            >
+              {t.label}
+            </Link>
+          ))}
+        </div>
+        <form action="/bounties" method="get" className="ml-auto flex gap-2">
+          {status && <input type="hidden" name="status" value={status} />}
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder={m.bounties.searchPlaceholder}
+            className="w-56 rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-violet-400/50"
+          />
+          <button
+            type="submit"
+            className="rounded-lg border border-[#30363d] px-3 py-1.5 text-sm text-zinc-300 hover:border-zinc-500"
           >
-            {t.label}
-          </Link>
-        ))}
+            {m.common.search}
+          </button>
+        </form>
       </div>
 
       {bounties.length === 0 ? (

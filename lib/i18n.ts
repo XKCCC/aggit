@@ -112,6 +112,7 @@ const zh = {
     statusAll: "全部",
     claims: "人认领",
     empty: "暂时没有符合条件的悬赏",
+    searchPlaceholder: "搜索需求或标签…",
   },
   bountyDetail: {
     budget: "悬赏预算",
@@ -391,6 +392,7 @@ const en: typeof zh = {
     statusAll: "All",
     claims: " claims",
     empty: "No bounties match these filters",
+    searchPlaceholder: "Search bounties or tags…",
   },
   bountyDetail: {
     budget: "Budget",

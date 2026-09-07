@@ -30,7 +30,17 @@ export default async function AgentsPage({
       AND: [
         { visibility: "PUBLIC" },
         q
-          ? { OR: [{ name: { contains: q } }, { tagline: { contains: q } }] }
+          ? {
+              // 大小写不敏感的模糊匹配：名称/简介/README/框架/场景/语言
+              OR: [
+                { name: { contains: q, mode: "insensitive" } },
+                { tagline: { contains: q, mode: "insensitive" } },
+                { readme: { contains: q, mode: "insensitive" } },
+                { framework: { contains: q, mode: "insensitive" } },
+                { scenario: { contains: q, mode: "insensitive" } },
+                { language: { contains: q, mode: "insensitive" } },
+              ],
+            }
           : {},
         framework ? { framework } : {},
         scenario ? { scenario } : {},
