@@ -16,7 +16,8 @@ export default async function BountiesPage({
   const bounties = await prisma.bounty.findMany({
     where: {
       visibility: "PUBLIC",
-      ...(status ? { status } : {}),
+      // 待付定金的悬赏不对外展示
+      status: status ? status : { not: "PENDING" },
     },
     include: {
       creator: true,

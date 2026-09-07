@@ -89,9 +89,9 @@ model Bounty {
   budgetMax   Int
   currency    String   @default("CNY")
   tags        String   @default("") // 逗号分隔，保持精益
-  status      String   @default("OPEN") // OPEN | COMPLETED | CANCELLED
+  status      String   @default("OPEN") // PENDING 待付定金 | OPEN 招募中 | COMPLETED 已完成 | CANCELLED 已取消
   visibility  String   @default("PUBLIC") // PUBLIC 公开 | HIDDEN 隐藏（仅发布方/管理员可见）
-  escrowStatus String  @default("NONE") // NONE 未开始 | AWAITING 等待托管 | DEPOSITED 已托管 | RELEASED 已放款
+  escrowStatus String  @default("NONE") // NONE 未开始 | AWAITING 等待预付定金 | DEPOSITED 定金已托管 | RELEASED 已结清
   creatorId   String
   creator     User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   projectId   String?

@@ -56,8 +56,14 @@ export default async function BountyDetailPage({
     .filter(Boolean);
   const isCreator = user?.id === bounty.creatorId;
   const isAdmin = !!user?.isAdmin;
-  // 隐藏悬赏仅发布方与管理员可见
-  if (bounty.visibility === "HIDDEN" && !isCreator && !isAdmin) notFound();
+  // 隐藏或待付定金的悬赏仅发布方与管理员可见
+  if (
+    (bounty.visibility === "HIDDEN" || bounty.status === "PENDING") &&
+    !isCreator &&
+    !isAdmin
+  ) {
+    notFound();
+  }
   const myClaim = user
     ? bounty.claims.find((c) => c.developerId === user.id)
     : undefined;
@@ -272,49 +278,50 @@ export default async function BountyDetailPage({
             </div>
           )}
 
-          {/* 发布方：验收通过后的赏金托管面板 */}
-          {isCreator && bounty.status === "COMPLETED" && (
-            <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-5">
-              <h2 className="text-sm font-semibold text-emerald-300">
-                {m.escrow.title}
-              </h2>
-              <div className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-zinc-400">{m.escrow.status}</span>
-                <span className="text-emerald-300">
-                  {bounty.escrowStatus === "RELEASED"
-                    ? m.escrow.released
-                    : bounty.escrowStatus === "DEPOSITED"
-                      ? m.escrow.deposited
-                      : m.escrow.awaiting}
-                </span>
-              </div>
-              {bounty.escrowStatus === "AWAITING" && (
-                <div className="mt-3">
-                  <p className="text-xs leading-relaxed text-zinc-400">
-                    {m.escrow.creatorTip}
-                  </p>
-                  <a
-                    href={`mailto:${PLATFORM.contactEmail}?subject=${encodeURIComponent(`aggit 悬赏托管：${bounty.title}`)}`}
-                    className="mt-3 block rounded-md bg-emerald-500 px-3 py-2 text-center text-sm font-medium text-[#0d1117] hover:bg-emerald-400"
-                  >
-                    {m.escrow.contactLabel} · {PLATFORM.contactEmail}
-                  </a>
-                  <p className="mt-3 border-t border-emerald-400/10 pt-2 text-xs text-zinc-500">
-                    {m.escrow.amountHint}：
-                    <span className="font-mono text-violet-300">
-                      {formatBudget(
-                        bounty.budgetMin,
-                        bounty.budgetMax,
-                        bounty.currency
-                      )}
-                    </span>
-                    {" · "}
-                    {m.escrow.commission} {PLATFORM.commissionRate * 100}%
-                  </p>
+          {/* 发布方：定金托管面板（待付定金 / 已完成） */}
+          {isCreator &&
+            (bounty.status === "PENDING" || bounty.status === "COMPLETED") && (
+              <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-5">
+                <h2 className="text-sm font-semibold text-emerald-300">
+                  {m.escrow.title}
+                </h2>
+                <div className="mt-3 flex items-center justify-between text-sm">
+                  <span className="text-zinc-400">{m.escrow.status}</span>
+                  <span className="text-emerald-300">
+                    {bounty.escrowStatus === "RELEASED"
+                      ? m.escrow.released
+                      : bounty.escrowStatus === "DEPOSITED"
+                        ? m.escrow.deposited
+                        : m.escrow.awaiting}
+                  </span>
                 </div>
-              )}
-            </div>
-          )}
+                {bounty.escrowStatus === "AWAITING" && (
+                  <div className="mt-3">
+                    <p className="text-xs leading-relaxed text-zinc-400">
+                      {m.escrow.creatorTip}
+                    </p>
+                    <a
+                      href={`mailto:${PLATFORM.contactEmail}?subject=${encodeURIComponent(`aggit 定金预付：${bounty.title}`)}`}
+                      className="mt-3 block rounded-md bg-emerald-500 px-3 py-2 text-center text-sm font-medium text-[#0d1117] hover:bg-emerald-400"
+                    >
+                      {m.escrow.contactLabel} · {PLATFORM.contactEmail}
+                    </a>
+                    <p className="mt-3 border-t border-emerald-400/10 pt-2 text-xs text-zinc-500">
+                      {m.escrow.depositAmount}：
+                      <span className="font-mono text-violet-300">
+                        {formatBudget(
+                          Math.round(bounty.budgetMin * 0.3),
+                          Math.round(bounty.budgetMax * 0.3),
+                          bounty.currency
+                        )}
+                      </span>
+                      {" · "}
+                      {m.escrow.commission} {PLATFORM.commissionRate * 100}%
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
           {/* 中标的开发者：托管状态提示 */}
           {myClaim?.status === "ACCEPTED" &&

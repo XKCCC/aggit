@@ -40,6 +40,11 @@ export const BOUNTY_STATUS: Record<
   string,
   { label: string; dot: string; badge: string }
 > = {
+  PENDING: {
+    label: "待付定金",
+    dot: "bg-amber-400",
+    badge: "bg-amber-400/10 text-amber-300 border-amber-400/30",
+  },
   OPEN: {
     label: "招募中",
     dot: "bg-emerald-400",

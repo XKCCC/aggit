@@ -29,6 +29,9 @@ export default async function NewBountyPage({
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl font-bold text-zinc-50">{m.bountyNew.title}</h1>
       <p className="mt-1 text-sm text-zinc-500">{m.bountyNew.subtitle}</p>
+      <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-xs text-amber-300">
+        {m.bountyNew.depositNote}
+      </p>
       {sp.error && (
         <p className="mt-4 rounded-lg border border-red-400/30 bg-red-400/10 px-4 py-2 text-sm text-red-300">
           {m.bountyNew.errorInvalid}

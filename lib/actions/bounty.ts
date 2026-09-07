@@ -42,6 +42,9 @@ export async function createBounty(formData: FormData) {
       tags,
       projectId,
       creatorId: user.id,
+      // 先预付 30% 定金并由平台确认后，悬赏才会公开（PENDING → OPEN）
+      status: "PENDING",
+      escrowStatus: "AWAITING",
     },
   });
   redirect(`/bounties/${bounty.id}`);
@@ -110,8 +113,8 @@ export async function acceptClaim(claimId: string) {
     }),
     prisma.bounty.update({
       where: { id: claim.bountyId },
-      // 验收通过后进入托管流程：等待发布方把赏金打入平台账户
-      data: { status: "COMPLETED", escrowStatus: "AWAITING" },
+      // 验收通过：悬赏完成，定金保持托管，待线下结清尾款后由管理员标记结清
+      data: { status: "COMPLETED" },
     }),
   ]);
   revalidatePath(`/bounties/${claim.bountyId}`);
