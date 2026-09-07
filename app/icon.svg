@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <mask id="infinity-mask-v2">
+      <!-- 基础白底，代表保留显示 -->
+      <rect width="120" height="120" fill="white" />
+      
+      <!-- 【核心修改】这里加了 fill="black"，不仅挖出了线条的缝隙，还把 ∞ 里面的两个孔彻底掏空了，A 的黑线绝对进不来 -->
+      <path d="M 60 65 C 48 50, 32 50, 32 65 C 32 80, 48 80, 60 65 C 72 50, 88 50, 88 65 C 88 80, 72 80, 60 65 Z" 
+            fill="black" stroke="black" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" />
+    </mask>
+  </defs>
+  
+  <!-- 极简白色底座 -->
+  <rect width="120" height="120" rx="24" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1" />
+  
+  <!-- 外围的黑色 A：边框略粗 (stroke-width="11")，并套用掏空遮罩 -->
+  <path mask="url(#infinity-mask-v2)" d="M 28 95 L 60 25 L 92 95" 
+        stroke="#111111" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  
+  <!-- 中间的绿色 ∞：线条稍细 (stroke-width="8")，完美卡在掏空的缝隙中 -->
+  <path d="M 60 65 C 48 50, 32 50, 32 65 C 32 80, 48 80, 60 65 C 72 50, 88 50, 88 65 C 88 80, 72 80, 60 65 Z" 
+        stroke="#00C853" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>

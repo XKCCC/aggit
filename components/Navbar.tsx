@@ -12,13 +12,17 @@ export default async function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-[#21262d] bg-[#0d1117]/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-        <Link href="/" className="flex items-baseline gap-2">
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-emerald-400">ag</span>
-            <span className="text-zinc-100">git</span>
-          </span>
-          <span className="hidden text-xs text-zinc-500 md:inline">
-            {m.nav.tagline}
+        <Link href="/" className="flex items-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/aggit.svg" alt="aggit" className="h-7 w-7 rounded-md" />
+          <span className="flex items-baseline gap-2">
+            <span className="text-xl font-bold tracking-tight">
+              <span className="text-emerald-400">ag</span>
+              <span className="text-zinc-100">git</span>
+            </span>
+            <span className="hidden text-xs text-zinc-500 md:inline">
+              {m.nav.tagline}
+            </span>
           </span>
         </Link>
 
