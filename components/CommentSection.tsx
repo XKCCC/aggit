@@ -27,7 +27,7 @@ export default async function CommentSection({
     empty: string;
   };
 }) {
-  const { m } = await getI18n();
+  const { locale, m } = await getI18n();
   return (
     <section className="mt-10">
       <h2 className="mb-4 text-lg font-semibold text-zinc-100">
@@ -87,7 +87,7 @@ export default async function CommentSection({
                     {c.user.displayName}
                   </span>
                   <span className="text-xs text-zinc-600">
-                    {timeAgo(c.createdAt)}
+                    {timeAgo(c.createdAt, locale)}
                   </span>
                 </div>
                 <p className="mt-1 text-sm whitespace-pre-wrap text-zinc-400">

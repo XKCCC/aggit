@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "aggit — Agent 开源集市",
+  title: "aggit — The Open Market for AI Agents",
   description:
-    "AI Agent 的开源发布与悬赏交易平台：开发者展示并变现 Agent，企业与个人发布悬赏需求。",
+    "Open-source publishing and bounty marketplace for AI agents: developers showcase and monetize agents, companies post bounties to find the right builders.",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

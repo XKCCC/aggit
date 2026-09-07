@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import Avatar from "./Avatar";
 import Tag from "./Tag";
-import { OPEN_TYPES } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
 import { getI18n } from "@/lib/i18n";
 
@@ -15,7 +14,7 @@ export default async function ProjectCard({
 }: {
   project: ProjectCardData;
 }) {
-  const { m } = await getI18n();
+  const { locale, m } = await getI18n();
   return (
     <Link
       href={`/agents/${project.id}`}
@@ -28,7 +27,7 @@ export default async function ProjectCard({
         <div className="flex shrink-0 gap-1.5">
           {project.kind === "COMPONENT" && <Tag>{m.agents.kindComponent}</Tag>}
           <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
-            {OPEN_TYPES[project.openType] ?? project.openType}
+            {m.labels.openTypes[project.openType] ?? project.openType}
           </Tag>
         </div>
       </div>
@@ -38,9 +37,9 @@ export default async function ProjectCard({
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        <Tag>{project.framework}</Tag>
+        <Tag>{m.labels.frameworks[project.framework] ?? project.framework}</Tag>
         <Tag>{project.language}</Tag>
-        <Tag>{project.scenario}</Tag>
+        <Tag>{m.labels.scenarios[project.scenario] ?? project.scenario}</Tag>
       </div>
 
       <div className="mt-4 flex items-center gap-2 border-t border-[#21262d] pt-3 text-xs text-zinc-500">
@@ -54,7 +53,7 @@ export default async function ProjectCard({
           <span className="text-amber-300">★</span>
           {project._count.stars}
         </span>
-        <span>· {timeAgo(project.createdAt)}</span>
+        <span>· {timeAgo(project.createdAt, locale)}</span>
       </div>
     </Link>
   );

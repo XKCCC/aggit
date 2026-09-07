@@ -162,7 +162,7 @@ export default async function AgentsPage({
               href={buildHref({ q, scenario, sort, kind, framework: f })}
               className={chip(framework === f)}
             >
-              {f}
+              {m.labels.frameworks[f] ?? f}
             </Link>
           ))}
         </div>
@@ -182,7 +182,7 @@ export default async function AgentsPage({
               href={buildHref({ q, framework, sort, kind, scenario: s })}
               className={chip(scenario === s)}
             >
-              {s}
+              {m.labels.scenarios[s] ?? s}
             </Link>
           ))}
         </div>

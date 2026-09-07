@@ -50,9 +50,9 @@ export default async function BountiesPage({
     { key: "", label: m.bounties.statusAll },
     ...Object.entries(BOUNTY_STATUS)
       .filter(([key]) => key !== "PENDING")
-      .map(([key, v]) => ({
+      .map(([key]) => ({
         key,
-        label: v.label,
+        label: m.labels.bountyStatus[key] ?? key,
       })),
   ];
 

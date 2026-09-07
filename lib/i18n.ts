@@ -238,6 +238,43 @@ const zh = {
     commission: "平台佣金",
     depositAmount: "预付定金（30%）参考",
     contactLabel: "联系平台",
+    mailSubject: "aggit 定金预付",
+  },
+  // 数据库中存储的中文数据值 → 界面显示标签（zh 为恒等映射，en 为翻译）
+  labels: {
+    openTypes: {
+      FULL: "全源码开源",
+      DOCS_ONLY: "仅开放调用文档",
+    } as Record<string, string>,
+    bountyStatus: {
+      PENDING: "待付定金",
+      OPEN: "招募中",
+      COMPLETED: "已完成",
+      CANCELLED: "已取消",
+    } as Record<string, string>,
+    claimStatus: {
+      ACTIVE: "已认领",
+      SUBMITTED: "已交付待验收",
+      ACCEPTED: "验收通过",
+      REJECTED: "未入选",
+    } as Record<string, string>,
+    roles: {
+      DEVELOPER: "开发者",
+      EMPLOYER: "需求方",
+    } as Record<string, string>,
+    frameworks: { 自研框架: "自研框架" } as Record<string, string>,
+    scenarios: {
+      代码生成: "代码生成",
+      数据分析: "数据分析",
+      客服与对话: "客服与对话",
+      内容创作: "内容创作",
+      办公自动化: "办公自动化",
+      金融量化: "金融量化",
+      "检索增强 RAG": "检索增强 RAG",
+      多智能体协作: "多智能体协作",
+      其他: "其他",
+    } as Record<string, string>,
+    options: { 其他: "其他" } as Record<string, string>,
   },
   login: {
     title: "登录 aggit",
@@ -525,6 +562,37 @@ const en: typeof zh = {
     commission: "Platform commission",
     depositAmount: "Deposit (30%) reference",
     contactLabel: "Contact platform",
+    mailSubject: "aggit deposit",
+  },
+  // 数据库中存储的中文数据值 → 界面显示标签（en 为翻译）
+  labels: {
+    openTypes: { FULL: "Fully open source", DOCS_ONLY: "Docs only" },
+    bountyStatus: {
+      PENDING: "Pending deposit",
+      OPEN: "Open",
+      COMPLETED: "Completed",
+      CANCELLED: "Cancelled",
+    },
+    claimStatus: {
+      ACTIVE: "Claimed",
+      SUBMITTED: "Delivered",
+      ACCEPTED: "Accepted",
+      REJECTED: "Not selected",
+    },
+    roles: { DEVELOPER: "Developer", EMPLOYER: "Employer" },
+    frameworks: { 自研框架: "Custom" },
+    scenarios: {
+      代码生成: "Code Generation",
+      数据分析: "Data Analysis",
+      客服与对话: "Support & Chat",
+      内容创作: "Content Creation",
+      办公自动化: "Office Automation",
+      金融量化: "Quant Finance",
+      "检索增强 RAG": "RAG",
+      多智能体协作: "Multi-agent",
+      其他: "Other",
+    },
+    options: { 其他: "Other" },
   },
   login: {
     title: "Sign in to aggit",
@@ -581,6 +649,7 @@ export type Messages = typeof zh;
 
 export async function getI18n(): Promise<{ locale: Locale; m: Messages }> {
   const store = await cookies();
-  const locale: Locale = store.get("aggit_locale")?.value === "en" ? "en" : "zh";
+  // 默认英文，cookie 选择中文时切换
+  const locale: Locale = store.get("aggit_locale")?.value === "zh" ? "zh" : "en";
   return { locale, m: dicts[locale] };
 }

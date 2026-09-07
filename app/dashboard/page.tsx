@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getI18n } from "@/lib/i18n";
-import { BOUNTY_STATUS, CLAIM_STATUS, ROLES } from "@/lib/constants";
+import { BOUNTY_STATUS, CLAIM_STATUS } from "@/lib/constants";
 import { formatBudget, timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
@@ -16,7 +16,7 @@ import {
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const { m } = await getI18n();
+  const { locale, m } = await getI18n();
 
   const [myProjects, myBounties, myClaims] = await Promise.all([
     prisma.project.findMany({
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
               {user.displayName}
             </h1>
             <Tag tone={user.role === "DEVELOPER" ? "accent" : "violet"}>
-              {ROLES[user.role] ?? user.role}
+              {m.labels.roles[user.role] ?? user.role}
             </Tag>
           </div>
           <p className="mt-0.5 font-mono text-xs text-zinc-500">
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
                   </form>
                   <span className="shrink-0 text-xs text-zinc-500">
                     <span className="text-amber-300">★</span> {p._count.stars} ·{" "}
-                    {timeAgo(p.createdAt)}
+                    {timeAgo(p.createdAt, locale)}
                   </span>
                 </li>
               ))}
@@ -171,7 +171,7 @@ export default async function DashboardPage() {
                       <span
                         className={`shrink-0 rounded-full border px-2 py-0.5 text-xs ${cs.badge}`}
                       >
-                        {cs.label}
+                        {m.labels.claimStatus[c.status] ?? cs.label}
                       </span>
                     </Link>
                   </li>
@@ -210,7 +210,7 @@ export default async function DashboardPage() {
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${st.dot}`}
                         />
-                        {st.label}
+                        {m.labels.bountyStatus[b.status] ?? st.label}
                       </span>
                       <span className="truncate text-sm font-medium text-zinc-200">
                         {b.title}
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
                         </form>
                         <span>
                           {b._count.claims} {m.bounties.claims} ·{" "}
-                          {timeAgo(b.createdAt)}
+                          {timeAgo(b.createdAt, locale)}
                         </span>
                       </span>
                     </span>

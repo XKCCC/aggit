@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getI18n } from "@/lib/i18n";
-import { OPEN_TYPES } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
@@ -23,7 +22,7 @@ export default async function AgentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { m } = await getI18n();
+  const { locale, m } = await getI18n();
   const user = await getCurrentUser();
 
   const project = await prisma.project.findUnique({
@@ -57,12 +56,24 @@ export default async function AgentDetailPage({
         ? m.agents.kindComponent
         : m.agents.kindAgent,
     ],
-    [m.agentDetail.framework, project.framework],
+    [
+      m.agentDetail.framework,
+      m.labels.frameworks[project.framework] ?? project.framework,
+    ],
     [m.agentDetail.language, project.language],
-    [m.agentDetail.scenario, project.scenario],
-    [m.agentDetail.license, project.licenseType],
-    [m.agentDetail.openType, OPEN_TYPES[project.openType] ?? project.openType],
-    [m.agentDetail.createdAt, timeAgo(project.createdAt)],
+    [
+      m.agentDetail.scenario,
+      m.labels.scenarios[project.scenario] ?? project.scenario,
+    ],
+    [
+      m.agentDetail.license,
+      m.labels.options[project.licenseType] ?? project.licenseType,
+    ],
+    [
+      m.agentDetail.openType,
+      m.labels.openTypes[project.openType] ?? project.openType,
+    ],
+    [m.agentDetail.createdAt, timeAgo(project.createdAt, locale)],
   ];
 
   return (
@@ -79,7 +90,7 @@ export default async function AgentDetailPage({
               {project.name}
             </h1>
             <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
-              {OPEN_TYPES[project.openType] ?? project.openType}
+              {m.labels.openTypes[project.openType] ?? project.openType}
             </Tag>
             {project.kind === "COMPONENT" && (
               <Tag>{m.agents.kindComponent}</Tag>

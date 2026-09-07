@@ -23,7 +23,15 @@ export default async function NewAgentPage({
         </p>
       )}
       <div className="mt-8">
-        <AgentForm labels={m.agentNew} submittingLabel={m.common.submitting} />
+        <AgentForm
+          labels={m.agentNew}
+          submittingLabel={m.common.submitting}
+          optLabels={{
+            ...m.labels.frameworks,
+            ...m.labels.scenarios,
+            ...m.labels.options,
+          }}
+        />
       </div>
     </div>
   );

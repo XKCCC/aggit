@@ -11,9 +11,11 @@ const LICENSES = ["MIT", "Apache-2.0", "GPL-3.0", "BSD-3-Clause", "其他"];
 export default function AgentForm({
   labels,
   submittingLabel,
+  optLabels,
 }: {
   labels: Messages["agentNew"];
   submittingLabel: string;
+  optLabels: Record<string, string>;
 }) {
   const [ghUrl, setGhUrl] = useState("");
   const [importMsg, setImportMsg] = useState<{
@@ -157,7 +159,7 @@ export default function AgentForm({
             <select name="framework" className={inputCls} defaultValue={FRAMEWORKS[0]}>
               {FRAMEWORKS.map((f) => (
                 <option key={f} value={f}>
-                  {f}
+                  {optLabels[f] ?? f}
                 </option>
               ))}
             </select>
@@ -172,7 +174,7 @@ export default function AgentForm({
             >
               {LANGUAGES.map((l) => (
                 <option key={l} value={l}>
-                  {l}
+                  {optLabels[l] ?? l}
                 </option>
               ))}
             </select>
@@ -182,7 +184,7 @@ export default function AgentForm({
             <select name="scenario" className={inputCls} defaultValue={SCENARIOS[0]}>
               {SCENARIOS.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {optLabels[s] ?? s}
                 </option>
               ))}
             </select>
@@ -219,7 +221,7 @@ export default function AgentForm({
             <select name="licenseType" className={inputCls} defaultValue="MIT">
               {LICENSES.map((l) => (
                 <option key={l} value={l}>
-                  {l}
+                  {optLabels[l] ?? l}
                 </option>
               ))}
             </select>

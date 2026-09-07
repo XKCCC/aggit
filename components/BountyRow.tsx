@@ -14,8 +14,10 @@ type BountyRowData = Prisma.BountyGetPayload<{
 }>;
 
 export default async function BountyRow({ bounty }: { bounty: BountyRowData }) {
-  const { m } = await getI18n();
+  const { locale, m } = await getI18n();
   const status = BOUNTY_STATUS[bounty.status] ?? BOUNTY_STATUS.OPEN;
+  const statusLabel =
+    m.labels.bountyStatus[bounty.status] ?? status.label;
   const tags = bounty.tags
     .split(",")
     .map((t) => t.trim())
@@ -32,7 +34,7 @@ export default async function BountyRow({ bounty }: { bounty: BountyRowData }) {
             className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs ${status.badge}`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-            {status.label}
+            {statusLabel}
           </span>
           <h3 className="truncate font-medium text-zinc-100 group-hover:text-violet-300">
             {bounty.title}
@@ -56,7 +58,7 @@ export default async function BountyRow({ bounty }: { bounty: BountyRowData }) {
         </span>
         <span>
           {bounty._count.claims} {m.bounties.claims} · {bounty.creator.displayName} ·{" "}
-          {timeAgo(bounty.createdAt)}
+          {timeAgo(bounty.createdAt, locale)}
         </span>
       </div>
     </Link>

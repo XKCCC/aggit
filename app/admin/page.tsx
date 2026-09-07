@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getI18n } from "@/lib/i18n";
-import { ROLES } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
@@ -21,7 +20,7 @@ import Link from "next/link";
 export default async function AdminPage() {
   const user = await getCurrentUser();
   if (!user || !user.isAdmin) notFound();
-  const { m } = await getI18n();
+  const { locale, m } = await getI18n();
 
   const users = await prisma.user.findMany({
     include: {
@@ -80,7 +79,7 @@ export default async function AdminPage() {
                         {u.blocked && <Tag tone="violet">{m.admin.blocked}</Tag>}
                       </div>
                       <div className="font-mono text-xs text-zinc-500">
-                        @{u.username} · {ROLES[u.role] ?? u.role}
+                        @{u.username} · {m.labels.roles[u.role] ?? u.role}
                       </div>
                     </div>
                   </div>
@@ -94,7 +93,7 @@ export default async function AdminPage() {
                   {u._count.projects} / {u._count.bounties}
                 </td>
                 <td className="px-4 py-3 text-zinc-500">
-                  {timeAgo(u.createdAt)}
+                  {timeAgo(u.createdAt, locale)}
                 </td>
                 <td className="px-4 py-3 text-right">
                   {u.isAdmin ? (
@@ -242,7 +241,7 @@ export default async function AdminPage() {
                     {b.title}
                   </Link>
                   <div className="mt-0.5 text-xs text-zinc-500">
-                    {b._count.claims} {m.bounties.claims} · {timeAgo(b.createdAt)}
+                    {b._count.claims} {m.bounties.claims} · {timeAgo(b.createdAt, locale)}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-zinc-400">

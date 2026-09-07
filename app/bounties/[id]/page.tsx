@@ -29,7 +29,7 @@ export default async function BountyDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { m } = await getI18n();
+  const { locale, m } = await getI18n();
   const user = await getCurrentUser();
 
   const bounty = await prisma.bounty.findUnique({
@@ -85,7 +85,7 @@ export default async function BountyDetailPage({
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${status.badge}`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
-            {status.label}
+            {m.labels.bountyStatus[bounty.status] ?? status.label}
           </span>
           {bounty.visibility === "HIDDEN" && (
             <Tag tone="violet">{m.moderation.hidden}</Tag>
@@ -105,7 +105,7 @@ export default async function BountyDetailPage({
             {bounty.creator.displayName}
           </span>
           <span>
-            {m.bountyDetail.createdAt} · {timeAgo(bounty.createdAt)}
+            {m.bountyDetail.createdAt} · {timeAgo(bounty.createdAt, locale)}
           </span>
           {tags.map((t) => (
             <Tag key={t}>{t}</Tag>
@@ -153,10 +153,10 @@ export default async function BountyDetailPage({
                         <span
                           className={`rounded-full border px-2 py-0.5 text-xs ${cs.badge}`}
                         >
-                          {cs.label}
+                          {m.labels.claimStatus[claim.status] ?? cs.label}
                         </span>
                         <span className="ml-auto text-xs text-zinc-600">
-                          {timeAgo(claim.createdAt)}
+                          {timeAgo(claim.createdAt, locale)}
                         </span>
                       </div>
                       <p className="mt-2 text-sm whitespace-pre-wrap text-zinc-400">
@@ -220,7 +220,8 @@ export default async function BountyDetailPage({
             {canClaim && myClaim && (
               <p className="mt-4 rounded-xl border border-sky-400/20 bg-sky-400/5 p-4 text-sm text-sky-300">
                 {m.bountyDetail.alreadyClaimed} ·{" "}
-                {(CLAIM_STATUS[myClaim.status] ?? CLAIM_STATUS.ACTIVE).label}
+                {m.labels.claimStatus[myClaim.status] ??
+                  (CLAIM_STATUS[myClaim.status] ?? CLAIM_STATUS.ACTIVE).label}
               </p>
             )}
             {!user && bounty.status === "OPEN" && (
@@ -301,7 +302,7 @@ export default async function BountyDetailPage({
                       {m.escrow.creatorTip}
                     </p>
                     <a
-                      href={`mailto:${PLATFORM.contactEmail}?subject=${encodeURIComponent(`aggit 定金预付：${bounty.title}`)}`}
+                      href={`mailto:${PLATFORM.contactEmail}?subject=${encodeURIComponent(`${m.escrow.mailSubject}: ${bounty.title}`)}`}
                       className="mt-3 block rounded-md bg-emerald-500 px-3 py-2 text-center text-sm font-medium text-[#0d1117] hover:bg-emerald-400"
                     >
                       {m.escrow.contactLabel} · {PLATFORM.contactEmail}
