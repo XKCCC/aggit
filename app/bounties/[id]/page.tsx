@@ -11,8 +11,7 @@ import Markdown from "@/components/Markdown";
 import CommentSection from "@/components/CommentSection";
 import PendingSubmit from "@/components/PendingSubmit";
 import DeleteButton from "@/components/DeleteButton";
-import PaymentQr from "@/components/PaymentQr";
-import { PAYMENT_INFO } from "@/lib/payment";
+import { PLATFORM } from "@/lib/payment";
 import {
   setBountyVisibility,
   deleteBounty,
@@ -294,18 +293,12 @@ export default async function BountyDetailPage({
                   <p className="text-xs leading-relaxed text-zinc-400">
                     {m.escrow.creatorTip}
                   </p>
-                  <div className="mt-3 flex justify-center">
-                    <PaymentQr
-                      src={PAYMENT_INFO.qrImage}
-                      alt={m.escrow.qrAlt}
-                      missingHint={m.escrow.qrMissing}
-                    />
-                  </div>
-                  <ul className="mt-3 space-y-1 text-xs text-zinc-500">
-                    {PAYMENT_INFO.accountLines.map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
+                  <a
+                    href={`mailto:${PLATFORM.contactEmail}?subject=${encodeURIComponent(`aggit 悬赏托管：${bounty.title}`)}`}
+                    className="mt-3 block rounded-md bg-emerald-500 px-3 py-2 text-center text-sm font-medium text-[#0d1117] hover:bg-emerald-400"
+                  >
+                    {m.escrow.contactLabel} · {PLATFORM.contactEmail}
+                  </a>
                   <p className="mt-3 border-t border-emerald-400/10 pt-2 text-xs text-zinc-500">
                     {m.escrow.amountHint}：
                     <span className="font-mono text-violet-300">
@@ -316,7 +309,7 @@ export default async function BountyDetailPage({
                       )}
                     </span>
                     {" · "}
-                    {m.escrow.commission} {PAYMENT_INFO.commissionRate * 100}%
+                    {m.escrow.commission} {PLATFORM.commissionRate * 100}%
                   </p>
                 </div>
               )}
