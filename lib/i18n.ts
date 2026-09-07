@@ -256,6 +256,8 @@ const zh = {
     roleEmp: "需求方（发布悬赏）",
     loginSubmit: "登录",
     registerSubmit: "注册并登录",
+    githubLogin: "使用 GitHub 登录",
+    divider: "或使用账号密码",
     oauthNote:
       "GitHub OAuth 已在代码中预留接入点，配置 Client ID/Secret 后即可启用",
     errors: {
@@ -270,6 +272,8 @@ const zh = {
       blocked: "该账号已被封禁，如有疑问请联系平台",
       oldWrong: "当前密码不正确",
       pwdShort: "新密码至少 8 位",
+      oauthState: "登录状态校验失败，请重试",
+      oauthFailed: "GitHub 授权失败，请重试",
     },
   },
   footer: {
@@ -532,6 +536,8 @@ const en: typeof zh = {
     roleEmp: "Employer (post bounties)",
     loginSubmit: "Sign in",
     registerSubmit: "Register & sign in",
+    githubLogin: "Sign in with GitHub",
+    divider: "or with account",
     oauthNote:
       "GitHub OAuth is pre-wired in the codebase — drop in your Client ID/Secret to enable it",
     errors: {
@@ -546,6 +552,8 @@ const en: typeof zh = {
       blocked: "This account has been blocked — contact the platform if you have questions",
       oldWrong: "Current password is incorrect",
       pwdShort: "New password must be at least 8 characters",
+      oauthState: "Sign-in state check failed — please retry",
+      oauthFailed: "GitHub authorization failed — please retry",
     },
   },
   footer: {

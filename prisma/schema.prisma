@@ -13,7 +13,8 @@ model User {
   displayName  String
   role         String // DEVELOPER | EMPLOYER
   passwordHash String?
-  email        String?   @unique
+  githubId    String?   @unique
+  email       String?   @unique
   emailVerified Boolean  @default(false)
   blocked      Boolean   @default(false)
   isAdmin      Boolean   @default(false) // 仅可通过数据库脚本授予，注册通道永不开放
