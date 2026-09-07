@@ -8,6 +8,10 @@ import { formatBudget, timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
+import {
+  setProjectVisibility,
+  setBountyVisibility,
+} from "@/lib/actions/moderation";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -88,24 +92,44 @@ export default async function DashboardPage() {
           ) : (
             <ul className="space-y-3">
               {myProjects.map((p) => (
-                <li key={p.id}>
+                <li
+                  key={p.id}
+                  className="flex items-center gap-3 rounded-lg border border-[#21262d] p-3"
+                >
                   <Link
                     href={`/agents/${p.id}`}
-                    className="flex items-center gap-3 rounded-lg border border-[#21262d] p-3 hover:border-emerald-400/40"
+                    className="min-w-0 flex-1 hover:opacity-80"
                   >
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-mono text-sm font-medium text-zinc-200">
-                        {p.name}
-                      </span>
-                      <span className="block truncate text-xs text-zinc-500">
-                        {p.tagline}
-                      </span>
+                    <span className="block truncate font-mono text-sm font-medium text-zinc-200">
+                      {p.name}
                     </span>
-                    <span className="shrink-0 text-xs text-zinc-500">
-                      <span className="text-amber-300">★</span>{" "}
-                      {p._count.stars} · {timeAgo(p.createdAt)}
+                    <span className="block truncate text-xs text-zinc-500">
+                      {p.tagline}
                     </span>
                   </Link>
+                  {p.visibility === "HIDDEN" && (
+                    <Tag tone="violet">{m.moderation.hidden}</Tag>
+                  )}
+                  <form
+                    action={setProjectVisibility.bind(
+                      null,
+                      p.id,
+                      p.visibility === "HIDDEN" ? "PUBLIC" : "HIDDEN"
+                    )}
+                  >
+                    <button
+                      type="submit"
+                      className="shrink-0 text-xs text-zinc-500 hover:text-amber-300"
+                    >
+                      {p.visibility === "HIDDEN"
+                        ? m.moderation.unhide
+                        : m.moderation.hide}
+                    </button>
+                  </form>
+                  <span className="shrink-0 text-xs text-zinc-500">
+                    <span className="text-amber-300">★</span> {p._count.stars} ·{" "}
+                    {timeAgo(p.createdAt)}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -172,34 +196,53 @@ export default async function DashboardPage() {
               {myBounties.map((b) => {
                 const st = BOUNTY_STATUS[b.status] ?? BOUNTY_STATUS.OPEN;
                 return (
-                  <li key={b.id}>
+                  <li
+                    key={b.id}
+                    className="flex flex-col gap-2 rounded-lg border border-[#21262d] p-3"
+                  >
                     <Link
                       href={`/bounties/${b.id}`}
-                      className="flex h-full flex-col gap-2 rounded-lg border border-[#21262d] p-3 hover:border-violet-400/40"
+                      className="flex items-center gap-2 hover:opacity-80"
                     >
-                      <span className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs ${st.badge}`}
+                      >
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs ${st.badge}`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${st.dot}`}
-                          />
-                          {st.label}
-                        </span>
-                        <span className="truncate text-sm font-medium text-zinc-200">
-                          {b.title}
-                        </span>
+                          className={`h-1.5 w-1.5 rounded-full ${st.dot}`}
+                        />
+                        {st.label}
                       </span>
-                      <span className="flex items-center justify-between text-xs text-zinc-500">
-                        <span className="font-mono text-violet-300">
-                          {formatBudget(b.budgetMin, b.budgetMax, b.currency)}
-                        </span>
+                      <span className="truncate text-sm font-medium text-zinc-200">
+                        {b.title}
+                      </span>
+                    </Link>
+                    <span className="flex items-center justify-between text-xs text-zinc-500">
+                      <span className="font-mono text-violet-300">
+                        {formatBudget(b.budgetMin, b.budgetMax, b.currency)}
+                      </span>
+                      <span className="flex items-center gap-3">
+                        <form
+                          action={setBountyVisibility.bind(
+                            null,
+                            b.id,
+                            b.visibility === "HIDDEN" ? "PUBLIC" : "HIDDEN"
+                          )}
+                        >
+                          <button
+                            type="submit"
+                            className="text-zinc-500 hover:text-amber-300"
+                          >
+                            {b.visibility === "HIDDEN"
+                              ? m.moderation.unhide
+                              : m.moderation.hide}
+                          </button>
+                        </form>
                         <span>
                           {b._count.claims} {m.bounties.claims} ·{" "}
                           {timeAgo(b.createdAt)}
                         </span>
                       </span>
-                    </Link>
+                    </span>
                   </li>
                 );
               })}

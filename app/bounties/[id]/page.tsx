@@ -10,6 +10,11 @@ import Tag from "@/components/Tag";
 import Markdown from "@/components/Markdown";
 import CommentSection from "@/components/CommentSection";
 import PendingSubmit from "@/components/PendingSubmit";
+import DeleteButton from "@/components/DeleteButton";
+import {
+  setBountyVisibility,
+  deleteBounty,
+} from "@/lib/actions/moderation";
 import {
   claimBounty,
   submitClaim,
@@ -49,6 +54,9 @@ export default async function BountyDetailPage({
     .map((t) => t.trim())
     .filter(Boolean);
   const isCreator = user?.id === bounty.creatorId;
+  const isAdmin = !!user?.isAdmin;
+  // 隐藏悬赏仅发布方与管理员可见
+  if (bounty.visibility === "HIDDEN" && !isCreator && !isAdmin) notFound();
   const myClaim = user
     ? bounty.claims.find((c) => c.developerId === user.id)
     : undefined;
@@ -72,6 +80,9 @@ export default async function BountyDetailPage({
             <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
             {status.label}
           </span>
+          {bounty.visibility === "HIDDEN" && (
+            <Tag tone="violet">{m.moderation.hidden}</Tag>
+          )}
           <h1 className="text-2xl font-bold text-zinc-50">{bounty.title}</h1>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-zinc-500">
@@ -257,6 +268,59 @@ export default async function BountyDetailPage({
                   className="w-full rounded-md border border-red-400/40 px-3 py-1.5 text-sm text-red-300 hover:bg-red-400/10"
                 />
               </form>
+            </div>
+          )}
+
+          {/* 发布方 / 管理员：可见性与删除 */}
+          {(isCreator || isAdmin) && (
+            <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-5">
+              <h2 className="text-sm font-semibold text-amber-300">
+                {m.moderation.manage}
+              </h2>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-zinc-400">{m.moderation.visibility}</span>
+                <span
+                  className={
+                    bounty.visibility === "HIDDEN"
+                      ? "text-amber-300"
+                      : "text-emerald-300"
+                  }
+                >
+                  {bounty.visibility === "HIDDEN"
+                    ? m.moderation.hidden
+                    : m.moderation.public}
+                </span>
+              </div>
+              <form
+                action={setBountyVisibility.bind(
+                  null,
+                  bounty.id,
+                  bounty.visibility === "HIDDEN" ? "PUBLIC" : "HIDDEN"
+                )}
+                className="mt-3"
+              >
+                <PendingSubmit
+                  label={
+                    bounty.visibility === "HIDDEN"
+                      ? m.moderation.unhide
+                      : m.moderation.hide
+                  }
+                  pendingLabel={m.common.submitting}
+                  className="w-full rounded-md border border-amber-400/40 px-3 py-1.5 text-sm text-amber-300 hover:bg-amber-400/10"
+                />
+              </form>
+              {isAdmin && (
+                <form
+                  action={deleteBounty.bind(null, bounty.id)}
+                  className="mt-2"
+                >
+                  <DeleteButton
+                    label={m.moderation.delete}
+                    confirmText={m.moderation.confirmDelete}
+                    className="w-full rounded-md border border-red-400/40 px-3 py-1.5 text-sm text-red-300 hover:bg-red-400/10"
+                  />
+                </form>
+              )}
             </div>
           )}
         </aside>

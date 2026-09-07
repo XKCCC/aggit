@@ -10,6 +10,12 @@ import Tag from "@/components/Tag";
 import Markdown from "@/components/Markdown";
 import StarButton from "@/components/StarButton";
 import CommentSection from "@/components/CommentSection";
+import PendingSubmit from "@/components/PendingSubmit";
+import DeleteButton from "@/components/DeleteButton";
+import {
+  setProjectVisibility,
+  deleteProject,
+} from "@/lib/actions/moderation";
 
 export default async function AgentDetailPage({
   params,
@@ -32,6 +38,11 @@ export default async function AgentDetailPage({
     },
   });
   if (!project) notFound();
+
+  const isOwner = user?.id === project.ownerId;
+  const isAdmin = !!user?.isAdmin;
+  // 隐藏项目仅作者本人与管理员可见
+  if (project.visibility === "HIDDEN" && !isOwner && !isAdmin) notFound();
 
   const starred = user
     ? !!(await prisma.star.findUnique({
@@ -64,6 +75,9 @@ export default async function AgentDetailPage({
             <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
               {OPEN_TYPES[project.openType] ?? project.openType}
             </Tag>
+            {project.visibility === "HIDDEN" && (
+              <Tag tone="violet">{m.moderation.hidden}</Tag>
+            )}
           </div>
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">
             {project.tagline}
@@ -142,6 +156,59 @@ export default async function AgentDetailPage({
               </a>
             )}
           </div>
+
+          {/* 作者 / 管理员：可见性与删除 */}
+          {(isOwner || isAdmin) && (
+            <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-5">
+              <h2 className="text-sm font-semibold text-amber-300">
+                {m.moderation.manage}
+              </h2>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-zinc-400">{m.moderation.visibility}</span>
+                <span
+                  className={
+                    project.visibility === "HIDDEN"
+                      ? "text-amber-300"
+                      : "text-emerald-300"
+                  }
+                >
+                  {project.visibility === "HIDDEN"
+                    ? m.moderation.hidden
+                    : m.moderation.public}
+                </span>
+              </div>
+              <form
+                action={setProjectVisibility.bind(
+                  null,
+                  project.id,
+                  project.visibility === "HIDDEN" ? "PUBLIC" : "HIDDEN"
+                )}
+                className="mt-3"
+              >
+                <PendingSubmit
+                  label={
+                    project.visibility === "HIDDEN"
+                      ? m.moderation.unhide
+                      : m.moderation.hide
+                  }
+                  pendingLabel={m.common.submitting}
+                  className="w-full rounded-md border border-amber-400/40 px-3 py-1.5 text-sm text-amber-300 hover:bg-amber-400/10"
+                />
+              </form>
+              {isAdmin && (
+                <form
+                  action={deleteProject.bind(null, project.id)}
+                  className="mt-2"
+                >
+                  <DeleteButton
+                    label={m.moderation.delete}
+                    confirmText={m.moderation.confirmDelete}
+                    className="w-full rounded-md border border-red-400/40 px-3 py-1.5 text-sm text-red-300 hover:bg-red-400/10"
+                  />
+                </form>
+              )}
+            </div>
+          )}
         </aside>
       </div>
     </div>

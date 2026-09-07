@@ -8,19 +8,22 @@ export default async function Home() {
   const { m } = await getI18n();
   const [agentCount, openBountyCount, budgetAgg, featured, latestBounties] =
     await Promise.all([
-      prisma.project.count(),
-      prisma.bounty.count({ where: { status: "OPEN" } }),
+      prisma.project.count({ where: { visibility: "PUBLIC" } }),
+      prisma.bounty.count({
+        where: { status: "OPEN", visibility: "PUBLIC" },
+      }),
       prisma.bounty.aggregate({
         _sum: { budgetMax: true },
-        where: { status: "OPEN" },
+        where: { status: "OPEN", visibility: "PUBLIC" },
       }),
       prisma.project.findMany({
+        where: { visibility: "PUBLIC" },
         include: { owner: true, _count: { select: { stars: true } } },
         orderBy: { stars: { _count: "desc" } },
         take: 3,
       }),
       prisma.bounty.findMany({
-        where: { status: "OPEN" },
+        where: { status: "OPEN", visibility: "PUBLIC" },
         include: {
           creator: true,
           project: true,

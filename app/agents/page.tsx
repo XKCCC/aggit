@@ -28,6 +28,7 @@ export default async function AgentsPage({
   const projects = await prisma.project.findMany({
     where: {
       AND: [
+        { visibility: "PUBLIC" },
         q
           ? { OR: [{ name: { contains: q } }, { tagline: { contains: q } }] }
           : {},

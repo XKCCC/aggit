@@ -14,7 +14,10 @@ export default async function BountiesPage({
   const status = sp.status ?? "";
 
   const bounties = await prisma.bounty.findMany({
-    where: status ? { status } : {},
+    where: {
+      visibility: "PUBLIC",
+      ...(status ? { status } : {}),
+    },
     include: {
       creator: true,
       project: true,
