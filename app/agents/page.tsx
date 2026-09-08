@@ -24,6 +24,7 @@ export default async function AgentsPage({
   const framework = sp.framework ?? "";
   const scenario = sp.scenario ?? "";
   const kind = sp.kind ?? "";
+  const showcase = sp.showcase === "1";
   const sort = sp.sort ?? "new";
 
   const projects = await prisma.project.findMany({
@@ -46,6 +47,7 @@ export default async function AgentsPage({
         framework ? { framework } : {},
         scenario ? { scenario } : {},
         kind ? { kind } : {},
+        showcase ? { showcase: true } : {},
       ],
     },
     include: { owner: true, _count: { select: { stars: true } } },
@@ -85,6 +87,7 @@ export default async function AgentsPage({
           )}
           {scenario && <input type="hidden" name="scenario" value={scenario} />}
           {kind && <input type="hidden" name="kind" value={kind} />}
+          {showcase && <input type="hidden" name="showcase" value="1" />}
           {sort !== "new" && <input type="hidden" name="sort" value={sort} />}
           <input
             name="q"
@@ -101,13 +104,13 @@ export default async function AgentsPage({
         </form>
         <div className="ml-auto flex gap-2 text-xs">
           <Link
-            href={buildHref({ q, framework, scenario, kind, sort: "new" })}
+            href={buildHref({ q, framework, scenario, kind, showcase: showcase ? "1" : "", sort: "new" })}
             className={chip(sort !== "stars")}
           >
             {m.common.sortNew}
           </Link>
           <Link
-            href={buildHref({ q, framework, scenario, kind, sort: "stars" })}
+            href={buildHref({ q, framework, scenario, kind, showcase: showcase ? "1" : "", sort: "stars" })}
             className={chip(sort === "stars")}
           >
             {m.common.sortStars}
@@ -122,40 +125,39 @@ export default async function AgentsPage({
             {m.agents.kind}
           </span>
           <Link
-            href={buildHref({ q, framework, scenario, sort, kind: "" })}
+            href={buildHref({ q, framework, scenario, sort, showcase: showcase ? "1" : "", kind: "" })}
             className={chip(!kind)}
           >
             {m.common.all}
           </Link>
           <Link
-            href={buildHref({ q, framework, scenario, sort, kind: "AGENT" })}
+            href={buildHref({ q, framework, scenario, sort, showcase: showcase ? "1" : "", kind: "AGENT" })}
             className={chip(kind === "AGENT")}
           >
             {m.agents.kindAgent}
           </Link>
           <Link
-            href={buildHref({
-              q,
-              framework,
-              scenario,
-              sort,
-              kind: "COMPONENT",
-            })}
+            href={buildHref({ q, framework, scenario, sort, showcase: showcase ? "1" : "", kind: "COMPONENT" })}
             className={chip(kind === "COMPONENT")}
           >
             {m.agents.kindComponent}
           </Link>
           <Link
-            href={buildHref({
-              q,
-              framework,
-              scenario,
-              sort,
-              kind: "BENCHMARK",
-            })}
+            href={buildHref({ q, framework, scenario, sort, showcase: showcase ? "1" : "", kind: "BENCHMARK" })}
             className={chip(kind === "BENCHMARK")}
           >
             {m.agents.kindBenchmark}
+          </Link>
+          <span className="mx-1 h-4 w-px bg-[#30363d]" />
+          <Link
+            href={buildHref({ q, framework, scenario, sort, kind, showcase: showcase ? "" : "1" })}
+            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              showcase
+                ? "border-amber-400/60 bg-amber-400/10 text-amber-300"
+                : "border-amber-400/30 text-amber-300/70 hover:border-amber-400/60 hover:text-amber-300"
+            }`}
+          >
+            ★ {m.showcase.badge}
           </Link>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -163,7 +165,7 @@ export default async function AgentsPage({
             {m.agents.framework}
           </span>
           <Link
-            href={buildHref({ q, scenario, sort, kind, framework: "" })}
+            href={buildHref({ q, scenario, sort, kind, showcase: showcase ? "1" : "", framework: "" })}
             className={chip(!framework)}
           >
             {m.common.all}
@@ -171,7 +173,7 @@ export default async function AgentsPage({
           {FRAMEWORKS.map((f) => (
             <Link
               key={f}
-              href={buildHref({ q, scenario, sort, kind, framework: f })}
+              href={buildHref({ q, scenario, sort, kind, showcase: showcase ? "1" : "", framework: f })}
               className={chip(framework === f)}
             >
               {m.labels.frameworks[f] ?? f}
@@ -183,7 +185,7 @@ export default async function AgentsPage({
             {m.agents.scenario}
           </span>
           <Link
-            href={buildHref({ q, framework, sort, kind, scenario: "" })}
+            href={buildHref({ q, framework, sort, kind, showcase: showcase ? "1" : "", scenario: "" })}
             className={chip(!scenario)}
           >
             {m.common.all}
@@ -191,7 +193,7 @@ export default async function AgentsPage({
           {SCENARIOS.map((s) => (
             <Link
               key={s}
-              href={buildHref({ q, framework, sort, kind, scenario: s })}
+              href={buildHref({ q, framework, sort, kind, showcase: showcase ? "1" : "", scenario: s })}
               className={chip(scenario === s)}
             >
               {m.labels.scenarios[s] ?? s}
