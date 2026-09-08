@@ -34,6 +34,7 @@ export default async function ProjectCard({
                   : project.kind}
             </Tag>
           )}
+          {project.claimable && <Tag tone="accent">{m.claim.badge}</Tag>}
           <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
             {m.labels.openTypes[project.openType] ?? project.openType}
           </Tag>

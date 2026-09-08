@@ -15,6 +15,11 @@ import {
   setProjectVisibility,
   deleteProject,
 } from "@/lib/actions/moderation";
+import {
+  setProjectClaimable,
+  claimProject,
+} from "@/lib/actions/project";
+import { parseGithubUrl } from "@/lib/github";
 
 export default async function AgentDetailPage({
   params,
@@ -42,6 +47,16 @@ export default async function AgentDetailPage({
   const isAdmin = !!user?.isAdmin;
   // 隐藏项目仅作者本人与管理员可见
   if (project.visibility === "HIDDEN" && !isOwner && !isAdmin) notFound();
+
+  // 认领资格：项目待认领 + 用户 GitHub 登录名与仓库所有者一致
+  const repoOwner = project.repoUrl
+    ? parseGithubUrl(project.repoUrl)?.owner
+    : undefined;
+  const canClaim =
+    project.claimable &&
+    !!user?.githubLogin &&
+    !!repoOwner &&
+    user.githubLogin.toLowerCase() === repoOwner.toLowerCase();
 
   const starred = user
     ? !!(await prisma.star.findUnique({
@@ -103,6 +118,7 @@ export default async function AgentDetailPage({
                     : project.kind}
               </Tag>
             )}
+            {project.claimable && <Tag tone="accent">{m.claim.badge}</Tag>}
             {project.visibility === "HIDDEN" && (
               <Tag tone="violet">{m.moderation.hidden}</Tag>
             )}
@@ -185,6 +201,46 @@ export default async function AgentDetailPage({
             )}
           </div>
 
+          {/* 待认领面板：原作者 GitHub 登录后一键过户 */}
+          {project.claimable && (
+            <div className="rounded-xl border border-sky-400/20 bg-sky-400/5 p-5">
+              <h2 className="text-sm font-semibold text-sky-300">
+                {m.claim.title}
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+                {m.claim.hint}
+              </p>
+              {user ? (
+                canClaim ? (
+                  <>
+                    <p className="mt-3 text-xs text-sky-300">{m.claim.match}</p>
+                    <form
+                      action={claimProject.bind(null, project.id)}
+                      className="mt-3"
+                    >
+                      <PendingSubmit
+                        label={m.claim.claim}
+                        pendingLabel={m.common.submitting}
+                        className="w-full rounded-md bg-sky-500 px-3 py-1.5 text-sm font-medium text-[#0d1117] hover:bg-sky-400"
+                      />
+                    </form>
+                  </>
+                ) : (
+                  <p className="mt-3 text-xs text-zinc-500">
+                    {user.githubLogin ? m.claim.mismatch : m.claim.needGithub}
+                  </p>
+                )
+              ) : (
+                <a
+                  href="/api/auth/github"
+                  className="mt-3 block rounded-md bg-sky-500 px-3 py-1.5 text-center text-sm font-medium text-[#0d1117] hover:bg-sky-400"
+                >
+                  {m.claim.loginFirst}
+                </a>
+              )}
+            </div>
+          )}
+
           {/* 作者 / 管理员：可见性与删除 */}
           {(isOwner || isAdmin) && (
             <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-5">
@@ -224,16 +280,36 @@ export default async function AgentDetailPage({
                 />
               </form>
               {isAdmin && (
-                <form
-                  action={deleteProject.bind(null, project.id)}
-                  className="mt-2"
-                >
-                  <DeleteButton
-                    label={m.moderation.delete}
-                    confirmText={m.moderation.confirmDelete}
-                    className="w-full rounded-md border border-red-400/40 px-3 py-1.5 text-sm text-red-300 hover:bg-red-400/10"
-                  />
-                </form>
+                <>
+                  <form
+                    action={setProjectClaimable.bind(
+                      null,
+                      project.id,
+                      !project.claimable
+                    )}
+                    className="mt-2"
+                  >
+                    <PendingSubmit
+                      label={
+                        project.claimable
+                          ? m.claim.unmarkClaimable
+                          : m.claim.markClaimable
+                      }
+                      pendingLabel={m.common.submitting}
+                      className="w-full rounded-md border border-sky-400/40 px-3 py-1.5 text-sm text-sky-300 hover:bg-sky-400/10"
+                    />
+                  </form>
+                  <form
+                    action={deleteProject.bind(null, project.id)}
+                    className="mt-2"
+                  >
+                    <DeleteButton
+                      label={m.moderation.delete}
+                      confirmText={m.moderation.confirmDelete}
+                      className="w-full rounded-md border border-red-400/40 px-3 py-1.5 text-sm text-red-300 hover:bg-red-400/10"
+                    />
+                  </form>
+                </>
               )}
             </div>
           )}

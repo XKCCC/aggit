@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { fetchGithubRepo } from "@/lib/github";
+import { fetchGithubRepo, parseGithubUrl } from "@/lib/github";
 import { rateLimit } from "@/lib/ratelimit";
 
 export async function importGithubRepo(url: string) {
@@ -68,4 +68,46 @@ export async function toggleStar(projectId: string) {
   revalidatePath(`/agents/${projectId}`);
   revalidatePath("/agents");
   revalidatePath("/");
+}
+
+// admin 标记项目为「待认领」（冷启动收录模式）
+export async function setProjectClaimable(
+  projectId: string,
+  claimable: boolean
+) {
+  const user = await getCurrentUser();
+  if (!user || !user.isAdmin) redirect("/");
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { claimable },
+  });
+  revalidatePath(`/agents/${projectId}`);
+  revalidatePath("/agents");
+}
+
+// 原作者一键认领：GitHub 登录名与仓库所有者一致即过户
+export async function claimProject(projectId: string) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!project || !project.claimable || !project.repoUrl || !user.githubLogin) {
+    return;
+  }
+  const parsed = parseGithubUrl(project.repoUrl);
+  if (
+    !parsed ||
+    parsed.owner.toLowerCase() !== user.githubLogin.toLowerCase()
+  ) {
+    return;
+  }
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { ownerId: user.id, claimable: false },
+  });
+  revalidatePath(`/agents/${projectId}`);
+  revalidatePath("/agents");
+  revalidatePath("/");
+  revalidatePath("/dashboard");
 }

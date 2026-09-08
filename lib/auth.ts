@@ -137,11 +137,22 @@ const GITHUB_AVATAR_COLORS = [
 ];
 
 export async function upsertGithubUser(profile: GithubProfile) {
-  // 1) githubId 直接命中：老用户登录
+  // 1) githubId 直接命中：老用户登录，顺带刷新 githubLogin
   const byGithubId = await prisma.user.findUnique({
     where: { githubId: profile.githubId },
   });
-  if (byGithubId) return byGithubId;
+  if (byGithubId) {
+    if (byGithubId.githubLogin !== profile.login) {
+      return prisma.user.update({
+        where: { id: byGithubId.id },
+        data: {
+          githubLogin: profile.login,
+          githubUrl: `https://github.com/${profile.login}`,
+        },
+      });
+    }
+    return byGithubId;
+  }
 
   // 2) 邮箱命中：为已有账号绑定 GitHub，同时视为邮箱已验证
   if (profile.email) {
@@ -151,7 +162,11 @@ export async function upsertGithubUser(profile: GithubProfile) {
     if (byEmail) {
       return prisma.user.update({
         where: { id: byEmail.id },
-        data: { githubId: profile.githubId, emailVerified: true },
+        data: {
+          githubId: profile.githubId,
+          githubLogin: profile.login,
+          emailVerified: true,
+        },
       });
     }
   }
@@ -179,6 +194,7 @@ export async function upsertGithubUser(profile: GithubProfile) {
       displayName: profile.name ?? profile.login,
       role: "DEVELOPER",
       githubId: profile.githubId,
+      githubLogin: profile.login,
       githubUrl: `https://github.com/${profile.login}`,
       email: profile.email,
       emailVerified: !!profile.email,
