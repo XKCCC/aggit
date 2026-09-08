@@ -272,7 +272,10 @@ const zh = {
       DEVELOPER: "开发者",
       EMPLOYER: "需求方",
     } as Record<string, string>,
-    frameworks: { 自研框架: "自研框架" } as Record<string, string>,
+    frameworks: {
+      自研框架: "自研框架",
+      其他: "其他",
+    } as Record<string, string>,
     scenarios: {
       代码生成: "代码生成",
       数据分析: "数据分析",
@@ -620,7 +623,7 @@ const en: typeof zh = {
       REJECTED: "Not selected",
     },
     roles: { DEVELOPER: "Developer", EMPLOYER: "Employer" },
-    frameworks: { 自研框架: "Custom" },
+    frameworks: { 自研框架: "Custom", 其他: "Other" },
     scenarios: {
       代码生成: "Code Generation",
       数据分析: "Data Analysis",
