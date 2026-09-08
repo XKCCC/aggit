@@ -145,6 +145,18 @@ export default async function AgentsPage({
           >
             {m.agents.kindComponent}
           </Link>
+          <Link
+            href={buildHref({
+              q,
+              framework,
+              scenario,
+              sort,
+              kind: "BENCHMARK",
+            })}
+            className={chip(kind === "BENCHMARK")}
+          >
+            {m.agents.kindBenchmark}
+          </Link>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="w-20 shrink-0 text-xs text-zinc-600">

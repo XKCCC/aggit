@@ -25,7 +25,15 @@ export default async function ProjectCard({
           {project.name}
         </h3>
         <div className="flex shrink-0 gap-1.5">
-          {project.kind === "COMPONENT" && <Tag>{m.agents.kindComponent}</Tag>}
+          {project.kind !== "AGENT" && (
+            <Tag>
+              {project.kind === "COMPONENT"
+                ? m.agents.kindComponent
+                : project.kind === "BENCHMARK"
+                  ? m.agents.kindBenchmark
+                  : project.kind}
+            </Tag>
+          )}
           <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
             {m.labels.openTypes[project.openType] ?? project.openType}
           </Tag>

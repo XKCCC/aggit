@@ -42,7 +42,9 @@ export async function createProject(formData: FormData) {
       language,
       scenario,
       openType,
-      kind: kind === "COMPONENT" ? "COMPONENT" : "AGENT",
+      kind: ["AGENT", "COMPONENT", "BENCHMARK"].includes(kind)
+        ? kind
+        : "AGENT",
       licenseType,
       repoUrl: repoUrl || null,
       ownerId: user.id,

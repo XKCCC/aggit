@@ -85,9 +85,9 @@ export default async function NewBountyPage({
           </div>
           <div>
             <label className={labelCls}>{m.bountyNew.currency}</label>
-            <select name="currency" className={inputCls} defaultValue="CNY">
-              <option value="CNY">CNY (¥)</option>
+            <select name="currency" className={inputCls} defaultValue="USD">
               <option value="USD">USD ($)</option>
+              <option value="CNY">CNY (¥)</option>
             </select>
           </div>
         </div>

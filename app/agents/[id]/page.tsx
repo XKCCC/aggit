@@ -54,7 +54,9 @@ export default async function AgentDetailPage({
       m.agents.kind,
       project.kind === "COMPONENT"
         ? m.agents.kindComponent
-        : m.agents.kindAgent,
+        : project.kind === "BENCHMARK"
+          ? m.agents.kindBenchmark
+          : m.agents.kindAgent,
     ],
     [
       m.agentDetail.framework,
@@ -92,8 +94,14 @@ export default async function AgentDetailPage({
             <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
               {m.labels.openTypes[project.openType] ?? project.openType}
             </Tag>
-            {project.kind === "COMPONENT" && (
-              <Tag>{m.agents.kindComponent}</Tag>
+            {project.kind !== "AGENT" && (
+              <Tag>
+                {project.kind === "COMPONENT"
+                  ? m.agents.kindComponent
+                  : project.kind === "BENCHMARK"
+                    ? m.agents.kindBenchmark
+                    : project.kind}
+              </Tag>
             )}
             {project.visibility === "HIDDEN" && (
               <Tag tone="violet">{m.moderation.hidden}</Tag>

@@ -17,7 +17,7 @@ export async function createBounty(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const budgetMin = Number(formData.get("budgetMin"));
   const budgetMax = Number(formData.get("budgetMax"));
-  const currency = String(formData.get("currency") || "CNY");
+  const currency = String(formData.get("currency") || "USD");
   const tags = String(formData.get("tags") || "").trim();
   const projectId = String(formData.get("projectId") || "") || null;
 

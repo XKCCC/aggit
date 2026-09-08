@@ -1,11 +1,11 @@
 export function formatBudget(
   min: number,
   max: number,
-  currency: string
+  _currency: string
 ): string {
-  const symbol = currency === "USD" ? "$" : "¥";
-  if (min === max) return `${symbol}${min.toLocaleString()}`;
-  return `${symbol}${min.toLocaleString()} - ${symbol}${max.toLocaleString()}`;
+  // 平台金额统一美元展示
+  if (min === max) return `$${min.toLocaleString()}`;
+  return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
 }
 
 export function timeAgo(date: Date, locale: string = "zh"): string {

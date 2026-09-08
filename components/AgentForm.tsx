@@ -130,7 +130,7 @@ export default function AgentForm({
 
         <div>
           <label className={labelCls}>{labels.kind}</label>
-          <div className="flex gap-4 rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-2">
+          <div className="flex flex-wrap gap-4 rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-2">
             <label className="flex items-center gap-2 text-sm text-zinc-300">
               <input
                 type="radio"
@@ -149,6 +149,15 @@ export default function AgentForm({
                 className="accent-violet-400"
               />
               {labels.kindComponent}
+            </label>
+            <label className="flex items-center gap-2 text-sm text-zinc-300">
+              <input
+                type="radio"
+                name="kind"
+                value="BENCHMARK"
+                className="accent-sky-400"
+              />
+              {labels.kindBenchmark}
             </label>
           </div>
         </div>
