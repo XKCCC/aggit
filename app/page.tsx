@@ -6,7 +6,7 @@ import BountyRow from "@/components/BountyRow";
 
 export default async function Home() {
   const { m } = await getI18n();
-  const [agentCount, openBountyCount, budgetAgg, featured, latestBounties] =
+  const [agentCount, openBountyCount, budgetAgg, showcase, topStarred, latestBounties] =
     await Promise.all([
       prisma.project.count({ where: { visibility: "PUBLIC" } }),
       prisma.bounty.count({
@@ -15,6 +15,12 @@ export default async function Home() {
       prisma.bounty.aggregate({
         _sum: { budgetMax: true },
         where: { status: "OPEN", visibility: "PUBLIC" },
+      }),
+      prisma.project.findMany({
+        where: { visibility: "PUBLIC", showcase: true },
+        include: { owner: true, _count: { select: { stars: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 3,
       }),
       prisma.project.findMany({
         where: { visibility: "PUBLIC" },
@@ -35,6 +41,10 @@ export default async function Home() {
     ]);
 
   const totalBudget = budgetAgg._sum.budgetMax ?? 0;
+  // Community Showcase：admin 精选优先，未设置时回退到 Star 榜
+  const featured = showcase.length > 0 ? showcase : topStarred;
+  const featuredTitle =
+    showcase.length > 0 ? m.showcase.title : m.home.featuredAgents;
 
   return (
     <div>
@@ -95,7 +105,7 @@ export default async function Home() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-zinc-100">
-            {m.home.featuredAgents}
+            {featuredTitle}
           </h2>
           <Link
             href="/agents"

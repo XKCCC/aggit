@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import Avatar from "./Avatar";
+import FounderBadge from "./FounderBadge";
 import PendingSubmit from "./PendingSubmit";
 import { addComment } from "@/lib/actions/comment";
 import { timeAgo } from "@/lib/format";
@@ -80,12 +81,16 @@ export default async function CommentSection({
                 name={c.user.displayName}
                 color={c.user.avatarColor}
                 size={32}
+                avatarUrl={c.user.avatarUrl}
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-2">
                   <span className="text-sm font-medium text-zinc-200">
                     {c.user.displayName}
                   </span>
+                  {c.user.isFounder && (
+                    <FounderBadge title={m.founder.badge} />
+                  )}
                   <span className="text-xs text-zinc-600">
                     {timeAgo(c.createdAt, locale)}
                   </span>

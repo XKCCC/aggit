@@ -125,6 +125,8 @@ export async function register(
   const colorIndex =
     username.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0) %
     AVATAR_COLORS.length;
+  // 前 1000 名注册用户授予 Founder 身份
+  const userCount = await prisma.user.count();
 
   if (existing) {
     // 此前注册过但没完成邮箱验证：允许用新信息覆盖并重新发码
@@ -147,6 +149,7 @@ export async function register(
         role,
         passwordHash: hashPassword(password),
         avatarColor: AVATAR_COLORS[colorIndex],
+        isFounder: userCount < 1000,
         // isAdmin / blocked / emailVerified 走 schema 默认值 false，注册通道无法触碰
       },
     });

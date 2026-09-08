@@ -5,6 +5,7 @@ import { getI18n } from "@/lib/i18n";
 import { timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
+import FounderBadge from "@/components/FounderBadge";
 import PendingSubmit from "@/components/PendingSubmit";
 import DeleteButton from "@/components/DeleteButton";
 import { setUserBlocked, setEscrowStatus } from "@/lib/actions/admin";
@@ -67,12 +68,16 @@ export default async function AdminPage() {
                       name={u.displayName}
                       color={u.avatarColor}
                       size={30}
+                      avatarUrl={u.avatarUrl}
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="truncate font-medium text-zinc-100">
                           {u.displayName}
                         </span>
+                        {u.isFounder && (
+                          <FounderBadge title={m.founder.badge} />
+                        )}
                         {u.isAdmin && (
                           <Tag tone="accent">{m.admin.badge}</Tag>
                         )}

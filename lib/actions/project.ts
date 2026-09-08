@@ -85,6 +85,22 @@ export async function setProjectClaimable(
   revalidatePath("/agents");
 }
 
+// admin 把项目加入/移出 Community Showcase 展区
+export async function setProjectShowcase(
+  projectId: string,
+  showcase: boolean
+) {
+  const user = await getCurrentUser();
+  if (!user || !user.isAdmin) redirect("/");
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { showcase },
+  });
+  revalidatePath(`/agents/${projectId}`);
+  revalidatePath("/agents");
+  revalidatePath("/");
+}
+
 // 原作者一键认领：GitHub 登录名与仓库所有者一致即过户
 export async function claimProject(projectId: string) {
   const user = await getCurrentUser();
@@ -105,6 +121,11 @@ export async function claimProject(projectId: string) {
   await prisma.project.update({
     where: { id: projectId },
     data: { ownerId: user.id, claimable: false },
+  });
+  // 被选中冷启动项目的开发者，授予 Founder 身份
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { isFounder: true },
   });
   revalidatePath(`/agents/${projectId}`);
   revalidatePath("/agents");

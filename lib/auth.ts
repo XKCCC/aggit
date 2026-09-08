@@ -57,6 +57,7 @@ export interface GithubProfile {
   login: string;
   name: string | null;
   email: string | null;
+  avatarUrl: string | null;
 }
 
 export function githubOAuthEnabled(): boolean {
@@ -122,6 +123,7 @@ export async function fetchGithubUser(
     login: profile.login ?? "github_user",
     name: profile.name ?? null,
     email,
+    avatarUrl: profile.avatar_url ?? null,
   };
 }
 
@@ -142,14 +144,17 @@ export async function upsertGithubUser(profile: GithubProfile) {
     where: { githubId: profile.githubId },
   });
   if (byGithubId) {
+    const patch: { githubLogin?: string; githubUrl?: string; avatarUrl?: string } = {};
     if (byGithubId.githubLogin !== profile.login) {
-      return prisma.user.update({
-        where: { id: byGithubId.id },
-        data: {
-          githubLogin: profile.login,
-          githubUrl: `https://github.com/${profile.login}`,
-        },
-      });
+      patch.githubLogin = profile.login;
+      patch.githubUrl = `https://github.com/${profile.login}`;
+    }
+    // 已自定义过头像的不覆盖
+    if (!byGithubId.avatarUrl && profile.avatarUrl) {
+      patch.avatarUrl = profile.avatarUrl;
+    }
+    if (Object.keys(patch).length > 0) {
+      return prisma.user.update({ where: { id: byGithubId.id }, data: patch });
     }
     return byGithubId;
   }
@@ -166,6 +171,7 @@ export async function upsertGithubUser(profile: GithubProfile) {
           githubId: profile.githubId,
           githubLogin: profile.login,
           emailVerified: true,
+          ...(byEmail.avatarUrl ? {} : { avatarUrl: profile.avatarUrl }),
         },
       });
     }
@@ -187,6 +193,8 @@ export async function upsertGithubUser(profile: GithubProfile) {
   const colorIndex =
     profile.githubId.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0) %
     GITHUB_AVATAR_COLORS.length;
+  // 前 1000 名注册用户授予 Founder 身份
+  const userCount = await prisma.user.count();
 
   return prisma.user.create({
     data: {
@@ -199,6 +207,8 @@ export async function upsertGithubUser(profile: GithubProfile) {
       email: profile.email,
       emailVerified: !!profile.email,
       avatarColor: GITHUB_AVATAR_COLORS[colorIndex],
+      avatarUrl: profile.avatarUrl,
+      isFounder: userCount < 1000,
       // passwordHash 留空：GitHub 注册的用户无密码，只能走 OAuth 登录
     },
   });

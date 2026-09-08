@@ -6,6 +6,7 @@ import { getI18n } from "@/lib/i18n";
 import { timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
+import FounderBadge from "@/components/FounderBadge";
 import Markdown from "@/components/Markdown";
 import StarButton from "@/components/StarButton";
 import CommentSection from "@/components/CommentSection";
@@ -18,6 +19,7 @@ import {
 import {
   setProjectClaimable,
   claimProject,
+  setProjectShowcase,
 } from "@/lib/actions/project";
 import { parseGithubUrl } from "@/lib/github";
 
@@ -131,8 +133,10 @@ export default async function AgentDetailPage({
               name={project.owner.displayName}
               color={project.owner.avatarColor}
               size={22}
+              avatarUrl={project.owner.avatarUrl}
             />
             <span className="text-zinc-300">{project.owner.displayName}</span>
+            {project.owner.isFounder && <FounderBadge title={m.founder.badge} />}
             <span className="font-mono text-xs">
               @{project.owner.username}
             </span>
@@ -297,6 +301,24 @@ export default async function AgentDetailPage({
                       }
                       pendingLabel={m.common.submitting}
                       className="w-full rounded-md border border-sky-400/40 px-3 py-1.5 text-sm text-sky-300 hover:bg-sky-400/10"
+                    />
+                  </form>
+                  <form
+                    action={setProjectShowcase.bind(
+                      null,
+                      project.id,
+                      !project.showcase
+                    )}
+                    className="mt-2"
+                  >
+                    <PendingSubmit
+                      label={
+                        project.showcase
+                          ? m.showcase.unmark
+                          : m.showcase.mark
+                      }
+                      pendingLabel={m.common.submitting}
+                      className="w-full rounded-md border border-emerald-400/40 px-3 py-1.5 text-sm text-emerald-300 hover:bg-emerald-400/10"
                     />
                   </form>
                   <form

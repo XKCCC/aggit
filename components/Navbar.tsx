@@ -4,6 +4,7 @@ import { getI18n } from "@/lib/i18n";
 import { setLocale } from "@/lib/actions/locale";
 import { logout } from "@/lib/actions/auth";
 import Avatar from "./Avatar";
+import FounderBadge from "./FounderBadge";
 
 export default async function Navbar() {
   const user = await getCurrentUser();
@@ -83,10 +84,12 @@ export default async function Navbar() {
                   name={user.displayName}
                   color={user.avatarColor}
                   size={26}
+                  avatarUrl={user.avatarUrl}
                 />
                 <span className="hidden text-sm text-zinc-300 lg:inline">
                   {user.displayName}
                 </span>
+                {user.isFounder && <FounderBadge title={m.founder.badge} />}
               </Link>
               <form action={logout}>
                 <button

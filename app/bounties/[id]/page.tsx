@@ -7,6 +7,7 @@ import { BOUNTY_STATUS, CLAIM_STATUS } from "@/lib/constants";
 import { formatBudget, timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
+import FounderBadge from "@/components/FounderBadge";
 import Markdown from "@/components/Markdown";
 import CommentSection from "@/components/CommentSection";
 import PendingSubmit from "@/components/PendingSubmit";
@@ -101,8 +102,12 @@ export default async function BountyDetailPage({
               name={bounty.creator.displayName}
               color={bounty.creator.avatarColor}
               size={20}
+              avatarUrl={bounty.creator.avatarUrl}
             />
             {bounty.creator.displayName}
+            {bounty.creator.isFounder && (
+              <FounderBadge title={m.founder.badge} />
+            )}
           </span>
           <span>
             {m.bountyDetail.createdAt} · {timeAgo(bounty.createdAt, locale)}
@@ -146,10 +151,14 @@ export default async function BountyDetailPage({
                           name={claim.developer.displayName}
                           color={claim.developer.avatarColor}
                           size={26}
+                          avatarUrl={claim.developer.avatarUrl}
                         />
                         <span className="text-sm font-medium text-zinc-200">
                           {claim.developer.displayName}
                         </span>
+                        {claim.developer.isFounder && (
+                          <FounderBadge title={m.founder.badge} />
+                        )}
                         <span
                           className={`rounded-full border px-2 py-0.5 text-xs ${cs.badge}`}
                         >

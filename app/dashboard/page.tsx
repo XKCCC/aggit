@@ -7,7 +7,9 @@ import { BOUNTY_STATUS, CLAIM_STATUS } from "@/lib/constants";
 import { formatBudget, timeAgo } from "@/lib/format";
 import Avatar from "@/components/Avatar";
 import Tag from "@/components/Tag";
+import FounderBadge from "@/components/FounderBadge";
 import ChangePasswordForm from "@/components/ChangePasswordForm";
+import ProfileForm from "@/components/ProfileForm";
 import {
   setProjectVisibility,
   setBountyVisibility,
@@ -45,12 +47,18 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       {/* 身份卡 */}
       <div className="flex flex-wrap items-center gap-4 rounded-xl border border-[#21262d] bg-gradient-to-r from-emerald-400/5 to-violet-400/5 p-5">
-        <Avatar name={user.displayName} color={user.avatarColor} size={48} />
+        <Avatar
+          name={user.displayName}
+          color={user.avatarColor}
+          size={48}
+          avatarUrl={user.avatarUrl}
+        />
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-zinc-50">
               {user.displayName}
             </h1>
+            {user.isFounder && <FounderBadge title={m.founder.badge} />}
             <Tag tone={user.role === "DEVELOPER" ? "accent" : "violet"}>
               {m.labels.roles[user.role] ?? user.role}
             </Tag>
@@ -251,21 +259,34 @@ export default async function DashboardPage() {
         </section>
       </div>
 
-      {/* 账号安全 */}
-      <section className="mt-6 rounded-xl border border-[#21262d] bg-[#0d1117] p-5">
-        <h2 className="mb-1 font-semibold text-zinc-100">
-          {m.dashboard.security}
-        </h2>
-        <p className="mb-4 text-sm text-zinc-500">
-          {m.dashboard.boundEmail}：{" "}
-          {user.email ? (
-            <span className="text-zinc-300">{user.email}</span>
-          ) : (
-            <span className="text-zinc-600">{m.dashboard.noEmail}</span>
-          )}
-        </p>
-        <ChangePasswordForm labels={m.dashboard} errors={m.login.errors} />
-      </section>
+      {/* 资料设置 + 账号安全 */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <section className="rounded-xl border border-[#21262d] bg-[#0d1117] p-5">
+          <ProfileForm
+            labels={m.dashboard}
+            user={{
+              displayName: user.displayName,
+              avatarColor: user.avatarColor,
+              avatarUrl: user.avatarUrl,
+            }}
+          />
+        </section>
+
+        <section className="rounded-xl border border-[#21262d] bg-[#0d1117] p-5">
+          <h2 className="mb-1 font-semibold text-zinc-100">
+            {m.dashboard.security}
+          </h2>
+          <p className="mb-4 text-sm text-zinc-500">
+            {m.dashboard.boundEmail}：{" "}
+            {user.email ? (
+              <span className="text-zinc-300">{user.email}</span>
+            ) : (
+              <span className="text-zinc-600">{m.dashboard.noEmail}</span>
+            )}
+          </p>
+          <ChangePasswordForm labels={m.dashboard} errors={m.login.errors} />
+        </section>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import Avatar from "./Avatar";
 import Tag from "./Tag";
+import FounderBadge from "./FounderBadge";
 import { timeAgo } from "@/lib/format";
 import { getI18n } from "@/lib/i18n";
 
@@ -25,6 +26,7 @@ export default async function ProjectCard({
           {project.name}
         </h3>
         <div className="flex shrink-0 gap-1.5">
+          {project.showcase && <Tag tone="accent">{m.showcase.badge}</Tag>}
           {project.kind !== "AGENT" && (
             <Tag>
               {project.kind === "COMPONENT"
@@ -56,8 +58,10 @@ export default async function ProjectCard({
           name={project.owner.displayName}
           color={project.owner.avatarColor}
           size={20}
+          avatarUrl={project.owner.avatarUrl}
         />
         <span className="text-zinc-400">{project.owner.displayName}</span>
+        {project.owner.isFounder && <FounderBadge title={m.founder.badge} />}
         <span className="ml-auto flex items-center gap-1">
           <span className="text-amber-300">★</span>
           {project._count.stars}

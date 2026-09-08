@@ -17,6 +17,8 @@ model User {
   githubLogin String?
   email       String?   @unique
   emailVerified Boolean  @default(false)
+  isFounder   Boolean   @default(false) // 前 1000 名注册 或 冷启动收录项目的开发者
+  avatarUrl   String?   // 自定义头像图片链接，空则用字母+底色头像
   blocked      Boolean   @default(false)
   isAdmin      Boolean   @default(false) // 仅可通过数据库脚本授予，注册通道永不开放
   avatarColor  String    @default("#10b981")
@@ -63,6 +65,7 @@ model Project {
   openType    String   @default("FULL") // FULL 全源码开源 | DOCS_ONLY 仅调用文档
   kind        String   @default("AGENT") // AGENT 完整 Agent | COMPONENT 组件/Skill/Harness
   claimable   Boolean  @default(false) // 平台收录，待原作者认领
+  showcase    Boolean  @default(false) // admin 精选，进入 Community Showcase 展区
   visibility  String   @default("PUBLIC") // PUBLIC 公开 | HIDDEN 隐藏（仅作者/管理员可见）
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
