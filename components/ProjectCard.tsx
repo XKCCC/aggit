@@ -21,26 +21,16 @@ export default async function ProjectCard({
       href={`/agents/${project.id}`}
       className="group flex flex-col rounded-xl border border-[#21262d] bg-[#0d1117] p-5 transition-colors hover:border-emerald-400/40"
     >
+      {/* 头部：项目名 + 开放程度（其余徽章进标签行，防出框） */}
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-mono text-base font-semibold text-zinc-100 group-hover:text-emerald-300">
+        <h3 className="min-w-0 break-words font-mono text-base font-semibold text-zinc-100 group-hover:text-emerald-300">
           {project.name}
         </h3>
-        <div className="flex shrink-0 gap-1.5">
-          {project.showcase && <Tag tone="accent">{m.showcase.badge}</Tag>}
-          {project.kind !== "AGENT" && (
-            <Tag>
-              {project.kind === "COMPONENT"
-                ? m.agents.kindComponent
-                : project.kind === "BENCHMARK"
-                  ? m.agents.kindBenchmark
-                  : project.kind}
-            </Tag>
-          )}
-          {project.claimable && <Tag tone="accent">{m.claim.badge}</Tag>}
-          <Tag tone={project.openType === "FULL" ? "accent" : "violet"}>
-            {m.labels.openTypes[project.openType] ?? project.openType}
-          </Tag>
-        </div>
+        <Tag
+          tone={project.openType === "FULL" ? "accent" : "violet"}
+        >
+          {m.labels.openTypes[project.openType] ?? project.openType}
+        </Tag>
       </div>
 
       <p className="mt-2 line-clamp-2 min-h-10 text-sm text-zinc-400">
@@ -48,6 +38,17 @@ export default async function ProjectCard({
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
+        {project.showcase && <Tag tone="accent">★ {m.showcase.badge}</Tag>}
+        {project.kind !== "AGENT" && (
+          <Tag>
+            {project.kind === "COMPONENT"
+              ? m.agents.kindComponent
+              : project.kind === "BENCHMARK"
+                ? m.agents.kindBenchmark
+                : project.kind}
+          </Tag>
+        )}
+        {project.claimable && <Tag tone="accent">{m.claim.badge}</Tag>}
         <Tag>{m.labels.frameworks[project.framework] ?? project.framework}</Tag>
         <Tag>{project.language}</Tag>
         <Tag>{m.labels.scenarios[project.scenario] ?? project.scenario}</Tag>
