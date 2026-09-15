@@ -39,6 +39,9 @@ yarn-error.log*
 # 本地工具配置
 .qwen/
 
+# 外联 agent 数据（含真实邮箱的台账/退订名单，绝不进仓库）
+/scripts/outreach/data/
+
 # vercel
 .vercel
 

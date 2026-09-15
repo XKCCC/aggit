@@ -20,6 +20,13 @@ export default async function NewBountyPage({
     orderBy: { createdAt: "desc" },
   });
   const presetProject = sp.project ?? "";
+  // aggie 向导生成的草稿预填
+  const preset = {
+    title: sp.title ?? "",
+    description: sp.description ?? "",
+    budgetMin: sp.budgetMin ?? "",
+    budgetMax: sp.budgetMax ?? "",
+  };
 
   const inputCls =
     "w-full rounded-lg border border-[#30363d] bg-[#161b22] px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-violet-400/50";
@@ -44,6 +51,7 @@ export default async function NewBountyPage({
           <input
             name="title"
             required
+            defaultValue={preset.title}
             placeholder={m.bountyNew.namePlaceholder}
             className={inputCls}
           />
@@ -55,6 +63,7 @@ export default async function NewBountyPage({
             name="description"
             required
             rows={10}
+            defaultValue={preset.description}
             placeholder={m.bountyNew.descriptionHint}
             className={`${inputCls} resize-y font-mono text-xs leading-relaxed`}
           />
@@ -68,6 +77,7 @@ export default async function NewBountyPage({
               type="number"
               min={1}
               required
+              defaultValue={preset.budgetMin}
               placeholder="500"
               className={`${inputCls} font-mono`}
             />
@@ -79,6 +89,7 @@ export default async function NewBountyPage({
               type="number"
               min={1}
               required
+              defaultValue={preset.budgetMax}
               placeholder="2000"
               className={`${inputCls} font-mono`}
             />

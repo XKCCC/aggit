@@ -303,6 +303,18 @@ const zh = {
     unmarkClaimable: "取消待认领",
   },
   founder: { badge: "创始用户" },
+  guide: {
+    name: "aggie 小吉",
+    tagline: "平台向导 · 在线",
+    welcome:
+      "你好呀！我是 aggie，平台的向导机器人 🤖 想找 Agent、发悬赏，或者单纯聊聊 AI，都可以问我～",
+    suggestions: ["帮我找代码类的 Agent", "我想发布一个定制需求", "aggit 是做什么的？"],
+    placeholder: "和 aggie 聊聊…",
+    send: "发送",
+    typing: "aggie 正在思考…",
+    goPublish: "去发布悬赏",
+    error: "哎呀，网络好像卡了一下，稍后再试试？",
+  },
   showcase: {
     title: "Community Showcase 社区精选",
     badge: "精选",
@@ -652,6 +664,22 @@ const en: typeof zh = {
     unmarkClaimable: "Unmark claimable",
   },
   founder: { badge: "Founder" },
+  guide: {
+    name: "aggie",
+    tagline: "Platform guide · Online",
+    welcome:
+      "Hi! I'm aggie, your guide robot 🤖 Ask me anything — finding agents, posting a bounty, or just chatting about AI!",
+    suggestions: [
+      "Find me a coding agent",
+      "I want to post a custom bounty",
+      "What is aggit?",
+    ],
+    placeholder: "Chat with aggie…",
+    send: "Send",
+    typing: "aggie is thinking…",
+    goPublish: "Post bounty",
+    error: "Oops, the network hiccuped — try again in a moment?",
+  },
   showcase: {
     title: "Community Showcase",
     badge: "Showcase",

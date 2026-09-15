@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import GuideWidget from "@/components/GuideWidget";
 import { getI18n } from "@/lib/i18n";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="border-t border-[#21262d] py-6 text-center text-xs text-zinc-600">
           {m.footer.text}
         </footer>
+        <GuideWidget labels={m.guide} />
       </body>
     </html>
   );
