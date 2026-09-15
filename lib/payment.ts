@@ -4,4 +4,5 @@
 export const PLATFORM = {
   contactEmail: "official@openaggit.com",
   commissionRate: 0.1,
+  depositRate: 0.1, // 预付定金比例（10%，平台做大了再考虑上调）
 };

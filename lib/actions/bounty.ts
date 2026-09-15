@@ -42,7 +42,7 @@ export async function createBounty(formData: FormData) {
       tags,
       projectId,
       creatorId: user.id,
-      // 先预付 30% 定金并由平台确认后，悬赏才会公开（PENDING → OPEN）
+      // 先预付 10% 定金并由平台确认后，悬赏才会公开（PENDING → OPEN）
       status: "PENDING",
       escrowStatus: "AWAITING",
     },

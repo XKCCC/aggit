@@ -320,8 +320,8 @@ export default async function BountyDetailPage({
                       {m.escrow.depositAmount}：
                       <span className="font-mono text-violet-300">
                         {formatBudget(
-                          Math.round(bounty.budgetMin * 0.3),
-                          Math.round(bounty.budgetMax * 0.3),
+                          Math.round(bounty.budgetMin * PLATFORM.depositRate),
+                          Math.round(bounty.budgetMax * PLATFORM.depositRate),
                           bounty.currency
                         )}
                       </span>

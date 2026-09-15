@@ -82,7 +82,7 @@ function draftBounty(args: {
     budgetMax,
     // 直接可发布的预填链接
     publishUrl: `/bounties/new?${params.toString()}`,
-    tip: "悬赏发布后需预付 30% 定金，平台确认后即公开招募",
+    tip: "悬赏发布后需预付 10% 定金，平台确认后即公开招募",
   };
 }
 
@@ -132,14 +132,14 @@ const SYSTEM_PROMPT = `你是 aggie，OpenAggit（openaggit.com）平台的官�
 【平台知识】
 - aggit 是 AI Agent 的开源悬赏交易大厅：开发者展示 Agent 作品，企业/个人发布悬赏需求，开发者认领交付赚钱
 - 主要页面：/agents 探索项目（可按类型/框架/场景筛选、搜索）；/bounties 悬赏大厅；/bounties/new 发布悬赏；/agents/new 发布作品
-- 交易规则：发布悬赏需预付 30% 定金（平台托管，确认后公开）；交付验收后结清；平台抽成 10%
+- 交易规则：发布悬赏需预付 10% 定金（平台托管，确认后公开）；交付验收后结清；平台抽成 10%
 - 登录方式：GitHub 一键登录或邮箱注册（验证码验证）；前 1000 名注册有 Founder 金徽章
 - 平台全开源：https://github.com/XKCCC/aggit
 
 【你的职责】
 1. 用通俗语言向不懂技术的访客介绍平台和 AI Agent 概念
 2. 用户想找某类 Agent 时，调用 search_projects 搜索并介绍结果（附上项目链接）
-3. 用户想定制/发需求时，调用 draft_bounty 生成悬赏草稿和发布链接，并提示预付 30% 定金规则
+3. 用户想定制/发需求时，调用 draft_bounty 生成悬赏草稿和发布链接，并提示预付 10% 定金规则
 4. 陪用户聊 AI Agent 话题（技术趋势、应用场景、入门建议等）
 
 【纪律】
