@@ -177,13 +177,13 @@ export default function GuideWidget({
               m.role === "user" ? (
                 <div
                   key={i}
-                  className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 px-3.5 py-2.5 text-sm whitespace-pre-wrap text-[#0d1117]"
+                  className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 px-3.5 py-2.5 text-sm whitespace-pre-wrap [overflow-wrap:anywhere] text-[#0d1117]"
                 >
                   {m.content}
                 </div>
               ) : (
                 <div key={i} className="max-w-[85%] space-y-2">
-                  <div className="rounded-2xl rounded-tl-sm bg-[#161b22] px-3.5 py-2.5 text-sm whitespace-pre-wrap text-zinc-200">
+                  <div className="rounded-2xl rounded-tl-sm bg-[#161b22] px-3.5 py-2.5 text-sm whitespace-pre-wrap [overflow-wrap:anywhere] text-zinc-200">
                     {m.content}
                   </div>
                   {m.actions?.map((a, j) => (
