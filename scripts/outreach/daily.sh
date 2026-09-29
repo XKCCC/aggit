@@ -8,3 +8,5 @@ cd /Users/xkcc/python_test/openagent || exit 1
 node scripts/outreach/agent.mjs daily
 # 为新收录的项目补商业话术卡（幂等，只处理 pitch 为空的）
 node scripts/outreach/pitch_gen.mjs
+# 清理 30 天未认领且无互动的收录项目（下架不删除）
+node scripts/outreach/cleanup.mjs --days 30
