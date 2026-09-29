@@ -306,13 +306,140 @@ async function daily() {
   const file = path.join(DATA_DIR, `demand-candidates-${date}.json`);
   const candidates = readJson(file, []);
   if (candidates.length === 0) {
-    console.log("今日无新需求信号，收工");
-    return;
+    console.log("今日无新需求信号（GitHub）");
+  } else {
+    const env = { ...loadEnv(), ...process.env };
+    const targets = candidates.slice(0, 5); // 每日 ≤5
+    const report = await sendTargets(targets, env);
+    console.log(
+      `═══ GitHub 需求侧完成：发 ${report.sent.length} / 跳 ${report.skipped.length} / 败 ${report.failed.length} ═══`
+    );
   }
+  // Reddit：产出 DM 待办清单（人工复制发送）
+  await redditScan({ limit: 5 });
+  console.log("═══ 需求侧每日外联完成 ═══\n");
+}
+
+// ---------- Reddit 信号源（半自动：出 DM 待办清单） ----------
+const REDDIT_SUBS = ["slavelabour", "forhire", "automate"];
+const REDDIT_LEDGER = path.join(DATA_DIR, "reddit_ledger.json");
+const REDDIT_KEYWORDS = [
+  "hiring", "paid", "pay", "$", "budget", "looking for someone",
+  "need someone", "automate", "automation", "agent", "ai", "chatbot",
+  "scrape", "bot",
+];
+
+async function redditFetchJson(url) {
+  const res = await fetch(url, {
+    headers: { "User-Agent": "aggit-research/1.0 (by /u/openaggit)" },
+  });
+  if (!res.ok) throw new Error(`Reddit ${res.status}`);
+  return res.json();
+}
+
+const REDDIT_JUDGE_PROMPT = `你在为一个 AI Agent 定制悬赏平台做需求信号过滤。给定一条 Reddit 帖子（来自 slavelabour/forhire/automate 等付费求助板块），判断它是否是"真实付费定制需求"（发帖人愿意付钱请人做自动化/AI/Agent/机器人相关的活）。
+判为真需求：明确提到付费/预算、要找人来做事。
+判为非需求：求职帖（[Hiring] 的反面，即本人在找工作）、纯提问、闲聊、与自动化无关。
+严格输出 JSON：{"convertible":true或false,"need":"一句中文概括需求（≤20字）","dm":"一段可直接发送的英文 Reddit 私信草稿，60-90词，口吻随性真诚：点出对方具体需求→一句介绍 openaggit.com（有验证过的开发者+赏金托管）→建议对方发悬赏并附链接 https://openaggit.com/bounties/new →不纠缠"}，不要输出其他内容。`;
+
+async function llmJudgeReddit(post, env) {
+  const base =
+    env.LLM_BASE_URL ?? "https://dashscope.aliyuncs.com/compatible-mode/v1";
+  const model = env.LLM_MODEL ?? "qwen-plus";
+  const res = await fetch(`${base}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.DASHSCOPE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: REDDIT_JUDGE_PROMPT },
+        {
+          role: "user",
+          content: `板块：r/${post.subreddit}\n标题：${post.title}\n内容：${post.body}`,
+        },
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.3,
+    }),
+  });
+  if (!res.ok) return { convertible: false };
+  const data = await res.json();
+  try {
+    return JSON.parse(data.choices?.[0]?.message?.content ?? "{}");
+  } catch {
+    return { convertible: false };
+  }
+}
+
+async function redditScan(args) {
+  const limit = Number(args.limit ?? 10);
   const env = { ...loadEnv(), ...process.env };
-  const targets = candidates.slice(0, 5); // 每日 ≤5
-  const report = await sendTargets(targets, env);
-  console.log(`═══ 需求侧完成：发 ${report.sent.length} / 跳 ${report.skipped.length} / 败 ${report.failed.length} ═══\n`);
+  const ledger = readJson(REDDIT_LEDGER, { listed: [] });
+  const seen = new Set(ledger.listed);
+
+  const posts = [];
+  for (const sub of REDDIT_SUBS) {
+    try {
+      const data = await redditFetchJson(
+        `https://www.reddit.com/r/${sub}/new.json?limit=50`
+      );
+      for (const child of data.data?.children ?? []) {
+        const p = child.data;
+        if (seen.has(p.permalink)) continue;
+        const text = `${p.title}\n${p.selftext ?? ""}`.toLowerCase();
+        if (!REDDIT_KEYWORDS.some((k) => text.includes(k))) continue;
+        posts.push({
+          subreddit: sub,
+          title: p.title,
+          body: (p.selftext ?? "").slice(0, 1000),
+          author: p.author,
+          permalink: p.permalink,
+          url: `https://www.reddit.com${p.permalink}`,
+          createdUtc: p.created_utc,
+        });
+      }
+    } catch (e) {
+      console.error(`r/${sub} 拉取失败: ${e.message}`);
+    }
+    await sleep(1200); // Reddit 限速友好
+  }
+  console.log(`关键词命中 ${posts.length} 帖，LLM 复审中…`);
+
+  const todos = [];
+  let idx = 1;
+  for (const p of posts) {
+    if (todos.length >= limit) break;
+    const verdict = await llmJudgeReddit(p, env);
+    if (!verdict.convertible || !verdict.dm) continue;
+    todos.push({
+      id: idx++,
+      ...p,
+      need: verdict.need ?? "",
+      dm: verdict.dm,
+      dmLink: `https://www.reddit.com/message/compose/?to=${p.author}`,
+    });
+    ledger.listed.push(p.permalink);
+  }
+  writeJson(REDDIT_LEDGER, ledger);
+
+  const date = new Date().toISOString().slice(0, 10);
+  const file = path.join(DATA_DIR, `reddit-todos-${date}.json`);
+  writeJson(file, todos);
+
+  console.log("─".repeat(80));
+  console.log("📮 Reddit DM 待办清单（复制草稿 → 点 DM 链接发送）:");
+  for (const t of todos) {
+    console.log(`\n#${t.id} [r/${t.subreddit}] ${t.title.slice(0, 65)}`);
+    console.log(`   需求: ${t.need}`);
+    console.log(`   帖子: ${t.url}`);
+    console.log(`   DM 链接: ${t.dmLink}`);
+    console.log(`   草稿: ${t.dm}`);
+  }
+  console.log("─".repeat(80));
+  console.log(`共 ${todos.length} 条 → ${file}`);
 }
 
 // ---------- 入口 ----------
@@ -320,5 +447,9 @@ const args = parseArgs(process.argv.slice(2));
 const cmd = args._[0];
 if (cmd === "scan") await scan(args);
 else if (cmd === "send") await send(args);
+else if (cmd === "reddit") await redditScan(args);
 else if (cmd === "daily") await daily();
-else console.log("用法: scan [--days N] | send --file <f> --ids <n> | daily");
+else
+  console.log(
+    "用法: scan [--days N] | send --file <f> --ids <n> | reddit [--limit 10] | daily"
+  );
