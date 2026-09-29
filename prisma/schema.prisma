@@ -64,6 +64,7 @@ model Project {
   licenseType String   @default("MIT")
   openType    String   @default("FULL") // FULL 全源码开源 | DOCS_ONLY 仅调用文档
   kind        String   @default("AGENT") // AGENT 完整 Agent | COMPONENT 组件/Skill/Harness
+  pitch       String? // 商业话术卡（JSON：适合谁/解决什么/定制示例，中英双语，LLM 生成）
   claimable   Boolean  @default(false) // 平台收录，待原作者认领
   showcase    Boolean  @default(false) // admin 精选，进入 Community Showcase 展区
   visibility  String   @default("PUBLIC") // PUBLIC 公开 | HIDDEN 隐藏（仅作者/管理员可见）

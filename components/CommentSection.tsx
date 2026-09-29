@@ -85,9 +85,12 @@ export default async function CommentSection({
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-sm font-medium text-zinc-200">
+                  <Link
+                    href={`/developers/${c.user.username}`}
+                    className="text-sm font-medium text-zinc-200 hover:text-emerald-300 hover:underline"
+                  >
                     {c.user.displayName}
-                  </span>
+                  </Link>
                   {c.user.isFounder && (
                     <FounderBadge title={m.founder.badge} />
                   )}

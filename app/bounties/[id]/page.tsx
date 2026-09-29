@@ -65,6 +65,34 @@ export default async function BountyDetailPage({
   ) {
     notFound();
   }
+
+  // 认领者迷你简历数据：公开作品数 + 已交付单数
+  const devIds = [...new Set(bounty.claims.map((c) => c.developerId))];
+  const [devProjectCounts, devDeliveredCounts] = await Promise.all([
+    prisma.project.groupBy({
+      by: ["ownerId"],
+      where: { ownerId: { in: devIds }, visibility: "PUBLIC" },
+      _count: { _all: true },
+    }),
+    prisma.claim.groupBy({
+      by: ["developerId"],
+      where: { developerId: { in: devIds }, status: "ACCEPTED" },
+      _count: { _all: true },
+    }),
+  ]);
+  const devStats = new Map(
+    devIds.map((id) => [
+      id,
+      {
+        projects:
+          devProjectCounts.find((d) => d.ownerId === id)?._count._all ?? 0,
+        delivered:
+          devDeliveredCounts.find((d) => d.developerId === id)?._count._all ??
+          0,
+      },
+    ])
+  );
+
   const myClaim = user
     ? bounty.claims.find((c) => c.developerId === user.id)
     : undefined;
@@ -141,6 +169,7 @@ export default async function BountyDetailPage({
               <ul className="space-y-3">
                 {bounty.claims.map((claim) => {
                   const cs = CLAIM_STATUS[claim.status] ?? CLAIM_STATUS.ACTIVE;
+                  const stats = devStats.get(claim.developerId);
                   return (
                     <li
                       key={claim.id}
@@ -153,12 +182,19 @@ export default async function BountyDetailPage({
                           size={26}
                           avatarUrl={claim.developer.avatarUrl}
                         />
-                        <span className="text-sm font-medium text-zinc-200">
+                        <Link
+                          href={`/developers/${claim.developer.username}`}
+                          className="text-sm font-medium text-zinc-200 hover:text-emerald-300 hover:underline"
+                        >
                           {claim.developer.displayName}
-                        </span>
+                        </Link>
                         {claim.developer.isFounder && (
                           <FounderBadge title={m.founder.badge} />
                         )}
+                        <span className="text-xs text-zinc-500">
+                          {stats?.projects ?? 0} {m.dev.agentsShort} ·{" "}
+                          {stats?.delivered ?? 0} {m.dev.deliveredShort}
+                        </span>
                         <span
                           className={`rounded-full border px-2 py-0.5 text-xs ${cs.badge}`}
                         >

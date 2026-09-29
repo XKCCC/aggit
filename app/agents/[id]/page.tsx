@@ -135,7 +135,12 @@ export default async function AgentDetailPage({
               size={22}
               avatarUrl={project.owner.avatarUrl}
             />
-            <span className="text-zinc-300">{project.owner.displayName}</span>
+            <Link
+              href={`/developers/${project.owner.username}`}
+              className="text-zinc-300 hover:text-emerald-300 hover:underline"
+            >
+              {project.owner.displayName}
+            </Link>
             {project.owner.isFounder && <FounderBadge title={m.founder.badge} />}
             <span className="font-mono text-xs">
               @{project.owner.username}
@@ -161,6 +166,71 @@ export default async function AgentDetailPage({
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_280px]">
         {/* 主栏：README + 讨论 */}
         <div className="min-w-0">
+          {/* 商业话术卡（LLM 生成，面向非技术雇主） */}
+          {(() => {
+            if (!project.pitch) return null;
+            let pitch: Record<string, unknown>;
+            try {
+              pitch = JSON.parse(project.pitch);
+            } catch {
+              return null;
+            }
+            const isZh = locale === "zh";
+            const audience = String(
+              (isZh ? pitch.audience_zh : pitch.audience_en) ?? ""
+            );
+            const problem = String(
+              (isZh ? pitch.problem_zh : pitch.problem_en) ?? ""
+            );
+            const examples = (
+              (isZh ? pitch.examples_zh : pitch.examples_en) as
+                | string[]
+                | undefined
+            )?.filter(Boolean);
+            if (!problem) return null;
+            return (
+              <div className="mb-6 rounded-xl border border-emerald-400/20 bg-gradient-to-br from-emerald-400/5 to-transparent p-6">
+                <h2 className="text-sm font-semibold text-emerald-300">
+                  {m.pitch.title}
+                </h2>
+                <div className="mt-4 space-y-3 text-sm">
+                  {audience && (
+                    <p className="text-zinc-300">
+                      <span className="mr-2 rounded-md bg-emerald-400/10 px-2 py-0.5 text-xs text-emerald-300">
+                        {m.pitch.audience}
+                      </span>
+                      {audience}
+                    </p>
+                  )}
+                  <p className="text-zinc-300">
+                    <span className="mr-2 rounded-md bg-emerald-400/10 px-2 py-0.5 text-xs text-emerald-300">
+                      {m.pitch.problem}
+                    </span>
+                    {problem}
+                  </p>
+                  {examples && examples.length > 0 && (
+                    <div>
+                      <span className="rounded-md bg-violet-400/10 px-2 py-0.5 text-xs text-violet-300">
+                        {m.pitch.examples}
+                      </span>
+                      <ul className="mt-2.5 space-y-1.5">
+                        {examples.map((ex, i) => (
+                          <li
+                            key={i}
+                            className="flex gap-2 text-sm text-zinc-400"
+                          >
+                            <span className="text-violet-300">→</span>
+                            {ex}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="rounded-xl border border-[#21262d] bg-[#0d1117] p-6">
             <Markdown content={project.readme} />
           </div>
