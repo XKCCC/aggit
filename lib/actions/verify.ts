@@ -61,7 +61,11 @@ export async function resendCode(
   // 仅对存在且未验证的账号发码；无论是否存在都返回 ok，避免账号枚举
   const user = await prisma.user.findUnique({ where: { email } });
   if (user && !user.emailVerified) {
-    await sendCode(email);
+    try {
+      await sendCode(email);
+    } catch (e) {
+      console.error("[resend] 验证码邮件发送失败:", e);
+    }
   }
   return { ok: true };
 }

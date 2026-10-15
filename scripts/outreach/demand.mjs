@@ -134,9 +134,25 @@ async function llmJudge(issue, env) {
 }
 
 // ---------- scan ----------
+// 意图精准的 issue 搜索查询（替代整仓库捞，从源头减少 bug 帖噪音）
+const ISSUE_QUERIES = [
+  '"our company" agent',
+  '"our team" "deploy" agent',
+  '"commercial use" agent',
+  '"enterprise" "deployment" agent',
+  '"integrate" "our product" agent',
+  '"we want to deploy"',
+  '"custom agent" "for our"',
+  '"production" "our customers" agent',
+  '"企业" "接入" agent',
+  '"商用" agent',
+];
+
 async function scan(args) {
   const days = Number(args.days ?? 30);
-  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const since = new Date(Date.now() - days * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
   const env = { ...loadEnv(), ...process.env };
   const ledger = readJson(LEDGER_FILE, []);
   const optout = new Set(readJson(OPTOUT_FILE, []).map((e) => e.toLowerCase()));
@@ -144,32 +160,34 @@ async function scan(args) {
   const seenEmails = new Set(ledger.map((l) => l.email));
 
   const hits = [];
-  for (const repo of REPOS) {
-    let issues = [];
+  const seenUrl = new Set();
+  for (const q of ISSUE_QUERIES) {
+    let res;
     try {
-      issues = gh(
-        `repos/${repo}/issues?state=open&since=${since}&per_page=50&sort=created&direction=desc`
+      res = gh(
+        `search/issues?q=${encodeURIComponent(`is:issue is:open ${q} created:>${since}`)}&sort=created&order=desc&per_page=30`
       );
     } catch (e) {
-      console.error(`拉取 ${repo} 失败: ${String(e.message).slice(0, 80)}`);
+      console.error(`搜索失败 [${q}]: ${String(e.message).slice(0, 80)}`);
       continue;
     }
-    for (const issue of issues) {
-      if (issue.pull_request) continue; // issues 接口混有 PR，剔除
-      if (seenIssues.has(issue.html_url)) continue;
-      const text = `${issue.title}\n${issue.body ?? ""}`.toLowerCase();
-      if (!KEYWORDS.some((k) => text.includes(k.toLowerCase()))) continue;
+    for (const issue of res.items ?? []) {
+      if (seenUrl.has(issue.html_url) || seenIssues.has(issue.html_url)) {
+        continue;
+      }
+      seenUrl.add(issue.html_url);
+      const repoMatch = issue.repository_url?.match(/repos\/(.+)$/);
       hits.push({
-        repo,
+        repo: repoMatch?.[1] ?? "?",
         title: issue.title,
         body: (issue.body ?? "").slice(0, 1200),
         issueUrl: issue.html_url,
         author: issue.user?.login ?? "",
       });
     }
-    console.log(`${repo}: 累计命中 ${hits.length}`);
+    console.log(`[${q}] 累计命中 ${hits.length}`);
   }
-  console.log(`\n关键词命中 ${hits.length} 条 issue，LLM 复审中…`);
+  console.log(`\n精准查询命中 ${hits.length} 条 issue，LLM 复审中…`);
 
   const candidates = [];
   let idx = 1;

@@ -128,34 +128,45 @@ export async function register(
   // 前 1000 名注册用户授予 Founder 身份
   const userCount = await prisma.user.count();
 
-  if (existing) {
-    // 此前注册过但没完成邮箱验证：允许用新信息覆盖并重新发码
-    await prisma.user.update({
-      where: { id: existing.id },
-      data: {
-        username,
-        displayName,
-        email,
-        role,
-        passwordHash: hashPassword(password),
-      },
-    });
-  } else {
-    await prisma.user.create({
-      data: {
-        username,
-        displayName,
-        email,
-        role,
-        passwordHash: hashPassword(password),
-        avatarColor: AVATAR_COLORS[colorIndex],
-        isFounder: userCount < 1000,
-        // isAdmin / blocked / emailVerified 走 schema 默认值 false，注册通道无法触碰
-      },
-    });
+  try {
+    if (existing) {
+      // 此前注册过但没完成邮箱验证：允许用新信息覆盖并重新发码
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          username,
+          displayName,
+          email,
+          role,
+          passwordHash: hashPassword(password),
+        },
+      });
+    } else {
+      await prisma.user.create({
+        data: {
+          username,
+          displayName,
+          email,
+          role,
+          passwordHash: hashPassword(password),
+          avatarColor: AVATAR_COLORS[colorIndex],
+          isFounder: userCount < 1000,
+          // isAdmin / blocked / emailVerified 走 schema 默认值 false，注册通道无法触碰
+        },
+      });
+    }
+  } catch (e) {
+    // 并发重复提交造成的唯一键冲突
+    if (String(e).includes("P2002")) return { error: "taken" };
+    throw e;
   }
 
-  await sendCode(email);
+  // 邮件服务故障绝不阻断注册：记日志，用户可在验证页随时重发
+  try {
+    await sendCode(email);
+  } catch (e) {
+    console.error("[register] 验证码邮件发送失败:", e);
+  }
   redirect(`/verify?email=${encodeURIComponent(email)}`);
 }
 
