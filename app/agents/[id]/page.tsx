@@ -54,6 +54,18 @@ export default async function AgentDetailPage({
   const repoOwner = project.repoUrl
     ? parseGithubUrl(project.repoUrl)?.owner
     : undefined;
+  const repoName = project.repoUrl
+    ? parseGithubUrl(project.repoUrl)?.repo
+    : undefined;
+  // README 相对路径资源解析基址（与 GitHub 渲染行为一致）
+  const rawBase =
+    repoOwner && repoName
+      ? `https://raw.githubusercontent.com/${repoOwner}/${repoName}/HEAD/`
+      : undefined;
+  const blobBase =
+    repoOwner && repoName
+      ? `https://github.com/${repoOwner}/${repoName}/blob/HEAD/`
+      : undefined;
   const canClaim =
     project.claimable &&
     !!user?.githubLogin &&
@@ -232,7 +244,11 @@ export default async function AgentDetailPage({
           })()}
 
           <div className="rounded-xl border border-[#21262d] bg-[#0d1117] p-6">
-            <Markdown content={project.readme} />
+            <Markdown
+              content={project.readme}
+              rawBase={rawBase}
+              blobBase={blobBase}
+            />
           </div>
 
           <CommentSection
